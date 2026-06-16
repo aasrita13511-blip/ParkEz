@@ -6,7 +6,7 @@ def apply_corporate_theme():
     <style>
         /* Global Background & Premium Typography */
         .stApp {
-            background-color: #FFFFFF !important; /* Pure White Main Background */
+            background-color: #FFFFFF !important; /* Pure White Main Canvas */
             font-family: 'Inter', -apple-system, sans-serif !important;
         }
         

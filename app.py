@@ -36,9 +36,9 @@ with tab1:
             user = customer_login(phone, password)
             if user:
                 st.session_state["user_phone"] = phone
-                st.session_state["user_name"] = user[1] if isinstance(user, (list, tuple)) else user
+                st.session_state["user_name"] = user[1] # Fixed: Safely pulls just name string
                 st.session_state["role"] = "Customer"
-                st.success(f"Welcome {st.session_state['user_name']}")
+                st.success(f"Welcome {st.session_state['user_name']}!")
                 st.switch_page("pages/customer.py")
             else:
                 st.error("Invalid Credentials")

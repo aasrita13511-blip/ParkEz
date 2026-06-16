@@ -33,7 +33,7 @@ def create_tables():
     )
     """)
 
-    # Bookings (UPDATED: Added Latitude and Longitude columns with stable defaults)
+    # Bookings
     cur.execute("""
     CREATE TABLE IF NOT EXISTS bookings(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,7 +107,6 @@ def get_available_driver():
 # ---------------- BOOKINGS ----------------
 def add_booking(data):
     conn = connect()
-    # Explicitly inject defaults for lat/long keys on initial requests creation
     full_data = data + (17.545, 78.390)
     conn.execute(
         """
@@ -142,7 +141,6 @@ def update_status(ticket, status):
 
 
 def update_driver_location(ticket, lat, lon):
-    """Updates live geographic coordinates dynamically."""
     conn = connect()
     conn.execute(
         "UPDATE bookings SET current_lat=?, current_lon=? WHERE ticket=?",

@@ -24,14 +24,10 @@ st.divider()
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    tot = total_cars()
-    val_tot = tot[0] if isinstance(tot, (list, tuple)) else tot
-    st.metric("🚗 TOTAL CARS", val_tot)
+    st.metric("🚗 TOTAL CARS", total_cars())
 
 with col2:
-    ret = retrieved_cars()
-    val_ret = ret[0] if isinstance(ret, (list, tuple)) else ret
-    st.metric("✅ CARS RETRIEVED", val_ret)
+    st.metric("✅ CARS RETRIEVED", retrieved_cars())
 
 with col3:
     st.metric("👨‍✈️ ACTIVE DRIVERS", len(active_drivers()))
@@ -48,16 +44,13 @@ drivers = active_drivers()
 if drivers:
     driver_cols = st.columns(min(len(drivers), 4))
     for idx, driver in enumerate(drivers):
-        d_name = driver[1] if isinstance(driver, (list, tuple)) and len(driver) > 1 else driver
-        d_phone = driver[2] if isinstance(driver, (list, tuple)) and len(driver) > 2 else "N/A"
-        d_status = driver[3] if isinstance(driver, (list, tuple)) and len(driver) > 3 else "Available"
         with driver_cols[idx % 4]:
             st.markdown(
                 f"""
                 <div class="card">
-                    <h4>👨‍✈️ {d_name}</h4>
-                    <p style="margin:4px 0;"><b>📞 Phone:</b> {d_phone}</p>
-                    <p style="margin:4px 0; color: #16A34A;"><b>Status:</b> 🟢 {d_status}</p>
+                    <h4>👨‍✈️ {driver[1]}</h4>
+                    <p style="margin:4px 0;"><b>📞 Phone:</b> {driver[2]}</p>
+                    <p style="margin:4px 0; color: #16A34A;"><b>Status:</b> 🟢 {driver[3]}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -87,7 +80,8 @@ if not df.empty:
             df['vehicle_number'].str.contains(search, case=False, na=False)
         ]
     
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    # Hide tracking coordinate columns from display log table view
+    st.dataframe(df.drop(columns=['current_lat', 'current_lon'], errors='ignore'), use_container_width=True, hide_index=True)
     
     csv_report = df.to_csv(index=False).encode('utf-8')
     st.download_button(

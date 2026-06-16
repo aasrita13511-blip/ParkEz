@@ -33,7 +33,7 @@ with tab1:
         else:
             st.warning("Please input all configuration fields.")
 
-# ================= RETRIEVE & TRACK VEHICLE (FOLIUM TRACKER ENGINE) =================
+# ================= RETRIEVE & TRACK VEHICLE (STABLE FOLIUM ENGINE) =================
 with tab2:
     st.subheader("Interactive Tracking Matrix")
     search_ticket = st.text_input("Enter Ticket ID to boot live tracking system")
@@ -47,22 +47,20 @@ with tab2:
 
             st.divider()
             
-            # --- SAFE WEB REFRESH SUBCOMPONENT FRAGMENT ---
+            # --- SAFE WEB REFRESH SUBCOMPONENT FRAGMENT (No looping crash) ---
             @st.fragment(run_every=4.0)
             def run_radar_telemetry(t_id):
                 live_data = get_booking(t_id)
                 if live_data:
-                    current_status = live_data
-                    lat = live_data if live_data is not None else 17.545
-                    lon = live_data if live_data is not None else 78.390
-                    driver_name = live_data if live_data is not None else "Assigned Driver"
+                    current_status = live_data[8]
+                    lat = live_data[10] if live_data[10] is not None else 17.545
+                    lon = live_data[11] if live_data[11] is not None else 78.390
+                    driver_name = live_data[7] if live_data[7] is not None else "Assigned Driver"
                     
                     st.info(f"🛰️ **Live Operational Status:** {current_status} | **Driver En Route:** {driver_name}")
                     
-                    # 1. Initialize Folium Baseline OpenStreetMap Canvas Engine
                     m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True)
                     
-                    # 2. Render moving driver target coordinate pin with interactive popup layout
                     folium.Marker(
                         [lat, lon],
                         popup=f"<b>Your Valet Driver ({driver_name})</b><br>Status: {current_status}",
@@ -70,14 +68,12 @@ with tab2:
                         icon=folium.Icon(color='red', icon='car', prefix='fa')
                     ).add_to(m)
                     
-                    # 3. Add a fixed destination drop-off checkpoint hub marker (Pure White / Blue tint pin)
                     folium.Marker(
                         [17.5490, 78.3950],
                         popup="<b>ParkEz Drop-off/Pickup Hub</b>",
                         icon=folium.Icon(color='blue', icon='flag')
                     ).add_to(m)
                     
-                    # 4. Draw a clear navigational path line between the car and the pickup hub
                     folium.PolyLine(
                         locations=[[lat, lon], [17.5490, 78.3950]],
                         color="#DC2626",
@@ -85,7 +81,6 @@ with tab2:
                         opacity=0.7
                     ).add_to(m)
                     
-                    # Render map inline directly within the view grids
                     st_folium(m, width="100%", height=500, key=f"map_{lat}_{lon}")
                 else:
                     st.error("Telemetry link lost.")
