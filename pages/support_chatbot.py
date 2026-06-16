@@ -1,5 +1,11 @@
+import importlib
 import streamlit as st
-from openai import OpenAI
+try:
+    openai = importlib.import_module("openai")
+    OpenAI = openai.OpenAI
+except ImportError:
+    st.error("❌ OpenAI package is not installed. Please install it using: pip install openai")
+    st.stop()
 from styles import apply_corporate_theme, render_brand_header
 
 st.set_page_config(
