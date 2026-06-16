@@ -38,6 +38,9 @@ with tab1:
                 st.session_state["user_phone"] = phone
                 st.session_state["user_name"] = user[1] # Fixed: Safely pulls just name string
                 st.session_state["role"] = "Customer"
+                
+                # --- NEW INTERACTIVE NOTIFICATIONS ---
+                st.toast(f"🔒 Authenticated securely as Customer: {st.session_state['user_name']}")
                 st.success(f"Welcome {st.session_state['user_name']}!")
                 st.switch_page("pages/customer.py")
             else:
@@ -47,6 +50,8 @@ with tab1:
             if phone == "8888888888" and password == "1234":
                 st.session_state["user_phone"] = phone
                 st.session_state["role"] = "Driver"
+                
+                st.toast("👨‍✈️ Driver Authentication Approved. Opening workload dispatch panel...")
                 st.switch_page("pages/driver.py")
             else:
                 st.error("Invalid Credentials")
@@ -55,6 +60,8 @@ with tab1:
             if phone == "7777777777" and password == "1234":
                 st.session_state["user_phone"] = phone
                 st.session_state["role"] = "Manager"
+                
+                st.toast("📊 Manager Credentials Approved. Launching administrative matrix dashboard...")
                 st.switch_page("pages/manager.py")
             else:
                 st.error("Invalid Credentials")
@@ -69,6 +76,8 @@ with tab2:
     if st.button("SIGN UP"):
         success = register_customer(name, phone_signup, password_signup)
         if success:
-            st.success("Account Created Successfully")
+            # --- NEW INTERACTIVE CELEBRATION ANIMATION ---
+            st.balloons()
+            st.success("Account Created Successfully! Please switch to the LOGIN tab to access your profile.")
         else:
             st.error("Phone Number Already Exists")
