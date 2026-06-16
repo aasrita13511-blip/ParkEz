@@ -24,10 +24,14 @@ st.divider()
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("🚗 TOTAL CARS", total_cars())
+    tot = total_cars()
+    val_tot = tot[0] if isinstance(tot, (list, tuple)) else tot
+    st.metric("🚗 TOTAL CARS", val_tot)
 
 with col2:
-    st.metric("✅ CARS RETRIEVED", retrieved_cars())
+    ret = retrieved_cars()
+    val_ret = ret[0] if isinstance(ret, (list, tuple)) else ret
+    st.metric("✅ CARS RETRIEVED", val_ret)
 
 with col3:
     st.metric("👨‍✈️ ACTIVE DRIVERS", len(active_drivers()))
@@ -36,6 +40,30 @@ with col4:
     st.metric("⏱ AVG WAIT TIME", "3 Minutes")
 
 st.divider()
+
+# ------------ LOADING DATABASE DATAFRAME ------------
+try:
+    df = get_bookings_df()
+except Exception as e:
+    st.error(f"Error reading booking records: {e}")
+    df = pd.DataFrame()
+
+# ------------ NEW: INTERACTIVE OPERATIONAL CHARTS ------------
+if not df.empty:
+    st.subheader("📊 REAL-TIME OPERATIONS ANALYTICS")
+    
+    # Calculate counts per status category using Pandas
+    status_counts = df['status'].value_counts().reset_index()
+    status_counts.columns = ['Status Component', 'Number of Vehicles']
+    
+    # Render interactive matching operational metrics bar chart
+    st.bar_chart(
+        data=status_counts, 
+        x='Status Component', 
+        y='Number of Vehicles', 
+        use_container_width=True
+    )
+    st.divider()
 
 # ------------ DRIVER DETAILS ------------
 st.subheader("👨‍✈️ DRIVER AVAILABILITY")
@@ -60,14 +88,8 @@ else:
 
 st.divider()
 
-# ------------ VEHICLE ACTIVITY ------------
+# ------------ VEHICLE ACTIVITY LOG ------------
 st.subheader("🚗 LIVE VEHICLE ACTIVITY LOG")
-
-try:
-    df = get_bookings_df()
-except Exception as e:
-    st.error(f"Error reading booking records: {e}")
-    df = pd.DataFrame()
 
 if not df.empty:
     search = st.text_input("🔍 Search Activity Log (Type Name, Ticket, or Car Model to filter):")
