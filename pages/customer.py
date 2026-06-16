@@ -21,108 +21,86 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* Global Canvas Background Adjustments */
+
 .stApp {
-    background-color: #F8F9FA !important; /* Soft Premium Off-White Canvas */
-    font-family: 'Inter', -apple-system, sans-serif !important;
+    background-color:#F8F9FA !important;
+    font-family:'Inter',sans-serif !important;
 }
+
 
 .portal-title{
 text-align:center;
 font-size:40px;
 font-weight:bold;
-color:#1A365D; /* Corporate Deep Blue Accent */
+color:#1A365D;
 }
 
-/* Card Styling Override */
-.card{
-background:white;
-padding:25px;
-border-radius:20px;
-box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
-border: 1px solid #E2E8F0;
+
+.benefit-card{
+
+background:#EEEEEE;
+
+border-radius:12px;
+
+padding:24px;
+
+min-height:160px;
+
 }
 
-/* Input Fields Cleanup */
-.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTimeInput input {
-    background-color: #FFFFFF !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 8px !important;
-    color: #1A202C !important;
+
+.benefit-card h3{
+
+color:#1A202C;
+
+font-size:20px;
+
 }
 
-/* Red and Blue Tab Accent Controls */
-div[data-testid="stTabs"] button {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #718096 !important;
-}
-div[data-testid="stTabs"] button[aria-selected="true"] {
-    color: #DE2910 !important; /* Active indicator brand red line */
-    border-bottom: 3px solid #DE2910 !important;
+
+.benefit-card p{
+
+color:#718096;
+
 }
 
-/* Option 2 Premium Corporate Button Overrides */
-div.stButton > button {
-    background-color: #1A365D !important; /* Brand Deep Blue Call-to-Action */
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-    padding: 12px 24px !important;
-    border-radius: 30px !important; /* Elegant modern pill buttons */
-    border: none !important;
-    width: 100% !important; 
-    box-shadow: 0 4px 6px -1px rgba(26, 54, 93, 0.1) !important;
-}
-div.stButton > button:hover {
-    background-color: #122542 !important; /* Darker blue on hover event */
+
+div.stButton > button{
+
+background:#1A365D !important;
+
+color:white !important;
+
+border-radius:30px !important;
+
+font-weight:bold !important;
+
+width:100% !important;
+
 }
 
-/* Light Grey Feature Bubble Squares (Uber Style Blocks) */
-.benefit-card {
-    background-color: #EEEEEE !important; /* Solid light grey bubble background */
-    border-radius: 12px !important;
-    padding: 24px !important;
-    min-height: 160px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    margin-bottom: 15px;
-}
-.benefit-card h3 {
-    color: #1A202C !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    margin: 0 0 8px 0 !important;
-}
-.benefit-card p {
-    color: #718096 !important;
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    margin: 0 !important;
+
+
+section[data-testid="stSidebar"]{
+
+background:#212529 !important;
+
 }
 
-/* High-Contrast Charcoal Dark Slate Sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #212529 !important; 
-    border-right: none !important;
-}
 
-/* Force all text elements, links, spans, and navigation text in the sidebar to Pure White */
-section[data-testid="stSidebar"] *, 
-section[data-testid="stSidebar"] span, 
-section[data-testid="stSidebarNavItems"] span,
-[data-testid="stSidebarNav"] a,
-[data-testid="stSidebarNav"] span {
-    color: #FFFFFF !important; /* Crisp white elements over dark background */
-    text-transform: uppercase !important;
-    letter-spacing: 1.2px !important;
-    font-weight: 600 !important;
+section[data-testid="stSidebar"] *{
+
+color:white !important;
+
 }
 
 </style>
 
 """, unsafe_allow_html=True)
+
+
+
+# ---------------- TITLE ----------------
 
 
 st.markdown(
@@ -138,14 +116,17 @@ unsafe_allow_html=True
 st.divider()
 
 
+
 # ---------------- TABS ----------------
 
-book, retrieve = st.tabs(
+
+book,retrieve = st.tabs(
 [
 "🚗 REQUEST VALET",
 "🔑 RETRIEVE VEHICLE"
 ]
 )
+
 
 
 
@@ -155,59 +136,28 @@ book, retrieve = st.tabs(
 with book:
 
 
-    st.subheader(
-        "Book Your Valet Driver"
-    )
+    st.subheader("Book Your Valet Driver")
 
 
-    name = st.text_input(
-        "Customer Name"
-    )
+    name = st.text_input("Customer Name")
+
+    phone = st.text_input("Phone Number")
+
+    car_model = st.text_input("Car Model")
+
+    vehicle_number = st.text_input("Vehicle Number")
+
+    arrival = st.time_input("Arrival Time")
 
 
-    phone = st.text_input(
-        "Phone Number"
-    )
+
+    if st.button("REQUEST DRIVER"):
 
 
-    car_model = st.text_input(
-        "Car Model"
-    )
+        if name and phone and car_model and vehicle_number:
 
 
-    vehicle_number = st.text_input(
-        "Vehicle Number"
-    )
-
-
-    arrival = st.time_input(
-        "Arrival Time"
-    )
-
-
-    if st.button(
-        "REQUEST DRIVER"
-    ):
-
-
-        if (
-            name
-            and phone
-            and car_model
-            and vehicle_number
-        ):
-
-
-            ticket = (
-                "VAL"
-                +
-                str(
-                    random.randint(
-                        1000,
-                        9999
-                    )
-                )
-            )
+            ticket = "VAL" + str(random.randint(1000,9999))
 
 
             driver = get_available_driver()
@@ -215,100 +165,98 @@ with book:
 
             add_booking(
 
-                (
-                ticket,
-                name,
-                phone,
-                car_model,
-                vehicle_number,
-                str(arrival),
-                driver,
-                "Driver Assigned",
-                "Just Now"
-                )
+            (
+            ticket,
+            name,
+            phone,
+            car_model,
+            vehicle_number,
+            str(arrival),
+            driver,
+            "Driver Assigned",
+            "Just Now"
+            )
 
             )
 
 
             st.success(
-                "Valet Driver Assigned Successfully"
+            "Valet Driver Assigned Successfully"
             )
 
 
             st.info(
-                f"""
+f"""
 🎫 Ticket ID : {ticket}
 
 🚘 Driver : {driver}
 
 📍 Status : Driver Assigned
 """
-            )
+)
 
 
         else:
 
             st.warning(
-                "Please fill all details"
+            "Please fill all details"
             )
 
 
 
 
-# ================= RETRIEVE VEHICLE =================
 
+# ================= RETRIEVE =================
 
 
 with retrieve:
 
 
-    st.subheader(
-        "Request Vehicle Retrieval"
-    )
+    st.subheader("Request Vehicle Retrieval")
 
 
     ticket = st.text_input(
-        "Enter Ticket ID"
+    "Enter Ticket ID"
     )
 
 
     leave_time = st.selectbox(
-        "When are you leaving?",
-        [
-            "2 Minutes",
-            "5 Minutes",
-            "10 Minutes"
-        ]
+
+    "When are you leaving?",
+
+    [
+    "2 Minutes",
+    "5 Minutes",
+    "10 Minutes"
+    ]
+
     )
 
 
-    if st.button(
-        "BRING MY CAR"
-    ):
+
+    if st.button("BRING MY CAR"):
 
 
         booking = get_booking(ticket)
+
 
 
         if booking:
 
 
             update_status(
-                ticket,
-                "Vehicle Returning"
+            ticket,
+            "Vehicle Returning"
             )
 
 
             st.success(
-                "Driver has been notified"
+            "Driver has been notified"
             )
 
 
-            st.divider()
-
-
             st.subheader(
-                "📍 LIVE TRACKING"
+            "📍 LIVE TRACKING"
             )
 
 
@@ -316,8 +264,11 @@ with retrieve:
             tracking = st.empty()
 
 
+            progress = st.progress(0)
 
-            steps = [
+
+
+            steps=[
 
             "Driver Assigned 🚘",
 
@@ -333,121 +284,279 @@ with retrieve:
 
 
 
-            progress = st.progress(0)
-
-
-
             for i,step in enumerate(steps):
 
 
                 time.sleep(1)
 
-
-                tracking.info(
-                    step
-                )
-
+                tracking.info(step)
 
                 progress.progress(
-                    (i+1)/len(steps)
+                (i+1)/len(steps)
                 )
 
 
 
             st.success(
-                f"""
+f"""
 Vehicle Ready!
 
 ETA : {leave_time}
 
 Driver : {booking[7]}
 """
-            )
-
+)
 
 
         else:
 
 
             st.error(
-                "Invalid Ticket ID"
+            "Invalid Ticket ID"
             )
 
 
-# =====================================================================
-# EXPLORE BENEFITS GRID INTEGRATION (ADDED AT THE BOTTOM)
-# =====================================================================
-st.write("")
-st.write("---")
-st.markdown("### Explore what you can do with ParkEz")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-        <div class="benefit-card">
-            <h3>Book Spot</h3>
-            <p>Reserve parking in advance. Skip the long lines and park hassle-free.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.button("Details", key="grid_details_spot")
-    
-with col2:
-    st.markdown("""
-        <div class="benefit-card">
-            <h3>Monthly Pass</h3>
-            <p>Get unlimited access to your favorite parking zones with fixed rates.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.button("Details", key="grid_details_pass")
-    
-with col3:
-    st.markdown("""
-        <div class="benefit-card">
-            <h3>EV Charging</h3>
-            <p>Find and secure parking slots equipped with rapid electric charging docks.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.button("Details", key="grid_details_ev")
 
 
-# =====================================================================
-# CHATBOT NAVIGATION INTEGRATION (ADDED AT THE BOTTOM)
-# =====================================================================
+
+# =================================================
+# EXPLORE PARK EZ FEATURES
+# =================================================
+
+
+st.divider()
+
 st.markdown(
-    """
-    <style>
-    div.stActionButton {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 999999;
-    }
-    .stActionButton button {
-        background-color: #ff4b4b !important;
-        color: white !important;
-        border-radius: 50% !important;
-        width: 60px !important;
-        height: 60px !important;
-        font-size: 28px !important;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.3) !important;
-        border: none !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    .stActionButton button:hover {
-        background-color: #e04040 !important;
-        transform: scale(1.05);
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
+"### Explore what you can do with ParkEz"
 )
 
-with st.container():
-    st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
-    if st.button("💬", key="customer_portal_floating_chat_action"):
-        st.switch_page("pages/support_chatbot.py")
-    st.markdown('</div>', unsafe_allow_html=True)
+
+
+col1,col2,col3 = st.columns(3)
+
+
+
+
+# BOOK SPOT
+
+
+with col1:
+
+
+    st.markdown(
+"""
+<div class="benefit-card">
+
+<h3>🚗 Book Spot</h3>
+
+<p>
+Reserve parking in advance.
+Skip waiting lines.
+</p>
+
+</div>
+
+""",
+unsafe_allow_html=True
+)
+
+
+
+    if st.button(
+    "Details",
+    key="spot"
+    ):
+
+
+        st.info(
+"""
+🚗 BOOK SPOT
+
+
+Reserve your parking before arrival.
+
+
+How it works:
+
+1. Enter customer details
+
+2. Add vehicle details
+
+3. Select arrival time
+
+4. Request valet driver
+
+5. Receive Ticket ID
+
+
+Benefits:
+
+✓ No waiting queues
+
+✓ Quick valet assignment
+
+✓ Live tracking
+
+✓ Easy retrieval
+
+"""
+)
+
+
+
+
+
+# MONTHLY PASS
+
+
+with col2:
+
+
+    st.markdown(
+"""
+<div class="benefit-card">
+
+<h3>📅 Monthly Pass</h3>
+
+<p>
+Fixed parking access for regular customers.
+</p>
+
+</div>
+
+""",
+unsafe_allow_html=True
+)
+
+
+
+    if st.button(
+    "Details",
+    key="pass"
+    ):
+
+
+        st.info(
+"""
+📅 MONTHLY PASS
+
+
+Enjoy easier parking with ParkEz.
+
+
+How it works:
+
+1. Register for a monthly plan
+
+2. Select parking location
+
+3. Activate your pass
+
+
+Benefits:
+
+✓ Fixed monthly rates
+
+✓ Faster parking access
+
+✓ No repeated booking
+
+✓ Convenient for regular users
+
+
+Perfect for:
+
+• Office employees
+
+• Frequent visitors
+
+"""
+)
+
+
+
+
+
+# EV CHARGING
+
+
+with col3:
+
+
+    st.markdown(
+"""
+<div class="benefit-card">
+
+<h3>⚡ EV Charging</h3>
+
+<p>
+Charge your EV while parked.
+</p>
+
+</div>
+
+""",
+unsafe_allow_html=True
+)
+
+
+
+    if st.button(
+    "Details",
+    key="ev"
+    ):
+
+
+        st.info(
+"""
+⚡ EV CHARGING
+
+
+Charge your electric vehicle with ParkEz.
+
+
+How it works:
+
+1. Select EV parking location
+
+2. Park your vehicle
+
+3. Connect charging station
+
+4. Monitor charging status
+
+
+Features:
+
+✓ EV support
+
+✓ Secure parking
+
+✓ Charging while parked
+
+✓ Saves time
+
+
+Availability depends on venue.
+
+"""
+)
+
+
+
+
+
+
+# =================================================
+# CHATBOT BUTTON
+# =================================================
+
+
+if st.button(
+"💬",
+key="chat"
+):
+
+    st.switch_page(
+    "pages/support_chatbot.py"
+    )
