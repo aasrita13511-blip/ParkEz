@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 from database import get_bookings_df, update_status, update_driver_location
 from styles import apply_corporate_theme, render_brand_header
 
@@ -46,8 +47,8 @@ else:
             
             # --- INTERACTIVE LIVE GPS SIMULATOR ---
             st.markdown("##### 🎮 Live GPS Tracking Simulation Controls")
-            new_lat = st.slider(f"Adjust Latitude Location Offset ({ticket})", min_value=17.5400, max_value=17.5600, value=float(lat), step=0.0005)
-            new_lon = st.slider(f"Adjust Longitude Location Offset ({ticket})", min_value=78.3800, max_value=78.4000, value=float(lon), step=0.0005)
+            new_lat = st.slider(f"Adjust Latitude Location Offset ({ticket})", min_value=17.5400, max_value=17.5600, value=float(lat), step=0.0001)
+            new_lon = st.slider(f"Adjust Longitude Location Offset ({ticket})", min_value=78.3800, max_value=78.4000, value=float(lon), step=0.0001)
             
             if new_lat != lat or new_lon != lon:
                 update_driver_location(ticket, new_lat, new_lon)
@@ -60,16 +61,19 @@ else:
             with col1:
                 if st.button("🚗 INITIALIZE CAR PICKUP", key=ticket+"p_int"):
                     update_status(ticket, "Picked Up")
-                    update_driver_location(ticket, 17.5460, 78.3910)
+                    # Snaps vehicle to the start of the tracking route line
+                    update_driver_location(ticket, 17.5450, 78.3900)
                     st.rerun()
             with col2:
                 if st.button("🅿️ SECURE IN PARKING STRUCTURE", key=ticket+"pk_int"):
                     update_status(ticket, "Parked Vehicle")
-                    update_driver_location(ticket, 17.5480, 78.3930)
+                    # Moves vehicle midway along the route path toward the lot structure
+                    update_driver_location(ticket, 17.5470, 78.3925)
                     st.rerun()
             with col3:
                 if st.button("✅ FINALIZE HANDOFF DELIVERY", key=ticket+"dl_int"):
                     update_status(ticket, "Delivered Vehicle")
+                    # Snaps the vehicle directly onto the customer's pickup hub destination
                     update_driver_location(ticket, 17.5490, 78.3950)
                     st.rerun()
             st.divider()
