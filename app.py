@@ -84,15 +84,49 @@ section[data-testid="stSidebar"] {
     background-color: #212529 !important; /* Dark Slate Charcoal Option 2 Sidebar */
     border-right: none !important;
 }
-section[data-testid="stSidebar"] *, section[data-testid="stSidebar"] span {
-    color: #FFFFFF !important; /* Crisp white tab navigation elements over dark background */
-}
 
-/* --- NEW SIDEBAR CAPITALIZATION STYLING --- */
-[data-testid="stSidebarNavItems"] span {
+/* Force all text elements, links, spans, and navigation text in the sidebar to Pure White */
+section[data-testid="stSidebar"] *, 
+section[data-testid="stSidebar"] span, 
+section[data-testid="stSidebarNavItems"] span,
+[data-testid="stSidebarNav"] a,
+[data-testid="stSidebarNav"] span {
+    color: #FFFFFF !important; /* Crisp white elements over dark background */
     text-transform: uppercase !important;
     letter-spacing: 1.2px !important;
     font-weight: 600 !important;
+}
+
+/* Light Grey Feature Info Bubbles Layout */
+.benefit-section-title {
+    color: #1A365D !important;
+    font-weight: 700 !important;
+    margin-top: 20px !important;
+    margin-bottom: 15px !important;
+}
+.benefit-card {
+    background-color: #EEEEEE !important; /* Solid light grey bubble background */
+    border-radius: 12px !important;
+    padding: 20px !important;
+    min-height: 180px !important;
+    margin-bottom: 15px;
+}
+.benefit-card h4 {
+    color: #1A365D !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 0 10px 0 !important;
+}
+.benefit-card ul {
+    margin: 0 !important;
+    padding-left: 20px !important;
+}
+.benefit-card li {
+    color: #4B5563 !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 6px !important;
+    font-weight: 500 !important;
 }
 
 /* --- FLOATING CHAT BUTTON POSITIONING --- */
@@ -178,7 +212,7 @@ with tab1:
             if user:
 
                 st.success(
-                    f"Welcome {user[1]}"
+                    f"Welcome {user}"
                 )
 
                 st.switch_page(
@@ -265,6 +299,41 @@ with tab2:
             st.error(
                 "Phone Number Already Exists"
             )
+
+
+# =====================================================================
+# CUSTOMER & BUSINESS BENEFITS GRID (BELOW THE LOGIN FORM)
+# =====================================================================
+st.write("")
+st.divider()
+
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.markdown("""
+        <div class="benefit-card">
+            <h4>For Customers</h4>
+            <ul>
+                <li>Easy access to valet parking at crowded locations</li>
+                <li>Request vehicle before leaving to reduce waiting time</li>
+                <li>Real-time vehicle status updates</li>
+                <li>Faster and convenient parking experience</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col_right:
+    st.markdown("""
+        <div class="benefit-card">
+            <h4>For Businesses</h4>
+            <ul>
+                <li>Provide valet service without hiring extra staff</li>
+                <li>Improve customer experience</li>
+                <li>Better parking operation management</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
+
 
 # ================= FLOATING SUPPORT BUTTON LAYER =================
 with st.container():

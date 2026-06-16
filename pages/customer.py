@@ -102,15 +102,19 @@ div.stButton > button:hover {
     margin: 0 !important;
 }
 
-/* --- ADDED THIS HERE TO KEEP THE SIDEBAR IN CAPITALS --- */
-section[data-testid="stSidebar"], section[data-testid="stSidebar"] * {
-    background-color: #212529 !important; /* High-Contrast Charcoal Dark Slate Sidebar */
-    color: #FFFFFF !important; /* Pure White text on dark sidebar options */
+/* High-Contrast Charcoal Dark Slate Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #212529 !important; 
+    border-right: none !important;
 }
+
+/* Force all text elements, links, spans, and navigation text in the sidebar to Pure White */
 section[data-testid="stSidebar"] *, 
-[data-testid="stSidebarNavItems"] *,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] a {
+section[data-testid="stSidebar"] span, 
+section[data-testid="stSidebarNavItems"] span,
+[data-testid="stSidebarNav"] a,
+[data-testid="stSidebarNav"] span {
+    color: #FFFFFF !important; /* Crisp white elements over dark background */
     text-transform: uppercase !important;
     letter-spacing: 1.2px !important;
     font-weight: 600 !important;
