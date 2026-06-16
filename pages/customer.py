@@ -107,3 +107,44 @@ with tab3:
                 st.info("No records found.")
         except Exception as e:
             st.error(f"Error: {e}")
+
+
+# ================= FLOATING CHAT BUTTON REQUIREMENT =================
+st.markdown(
+    """
+    <style>
+    div.stActionButton {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 999999;
+    }
+    .stActionButton button {
+        background-color: #ff4b4b !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 28px !important;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3) !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .stActionButton button:hover {
+        background-color: #e04040 !important;
+        transform: scale(1.05);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Container rendering the navigation chat action target
+with st.container():
+    st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
+    if st.button("💬", key="customer_floating_chat_action"):
+        st.switch_page("pages/support_chatbot.py")
+    st.markdown('</div>', unsafe_allow_html=True)
