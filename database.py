@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-# Consolidated to look at your primary active database file
+# Directing cleanly to your active database file name
 DB_NAME = "valet.db"
 
 
@@ -14,7 +14,7 @@ def create_tables():
     conn = connect()
     cur = conn.cursor()
 
-    # Customers
+    # Customers Table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS customers(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,7 +24,7 @@ def create_tables():
     )
     """)
 
-    # Drivers
+    # Drivers Table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS drivers(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +34,7 @@ def create_tables():
     )
     """)
 
-    # Bookings
+    # Bookings Table (100% Stable: Cleaned of all buggy tracking/GPS columns)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS bookings(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,9 +46,7 @@ def create_tables():
         arrival_time TEXT,
         driver TEXT,
         status TEXT,
-        updated_time TEXT,
-        current_lat REAL DEFAULT 17.545,
-        current_lon REAL DEFAULT 78.390
+        updated_time TEXT
     )
     """)
 
@@ -70,6 +68,7 @@ def create_tables():
 
 
 # ---------------- CUSTOMER ----------------
+
 def register_customer(name, phone, password):
     conn = connect()
     try:
@@ -87,20 +86,20 @@ def register_customer(name, phone, password):
 
 def customer_login(phone, password):
     conn = connect()
-    # Pull out indices specifically matching data arrays
     data = conn.execute(
         "SELECT name FROM customers WHERE phone=? AND password=?",
         (phone, password)
     ).fetchone()
     conn.close()
     
-    # Return just the raw user name string safely if row exists
+    # Return just the extracted name string if found
     if data:
         return data[0]
     return None
 
 
 # ---------------- DRIVER ----------------
+
 def get_available_driver():
     conn = connect()
     driver = conn.execute("SELECT name FROM drivers LIMIT 1").fetchone()
@@ -111,18 +110,18 @@ def get_available_driver():
 
 
 # ---------------- BOOKINGS ----------------
+
 def add_booking(data):
     conn = connect()
-    full_data = data + (17.545, 78.390)
     conn.execute(
         """
         INSERT INTO bookings(
             ticket, customer, phone, car_model, vehicle_number,
-            arrival_time, driver, status, updated_time, current_lat, current_lon
+            arrival_time, driver, status, updated_time
         )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?)
+        VALUES(?,?,?,?,?,?,?,?,?)
         """,
-        full_data
+        data
     )
     conn.commit()
     conn.close()
@@ -146,16 +145,6 @@ def update_status(ticket, status):
     conn.close()
 
 
-def update_driver_location(ticket, lat, lon):
-    conn = connect()
-    conn.execute(
-        "UPDATE bookings SET current_lat=?, current_lon=? WHERE ticket=?",
-        (lat, lon, ticket)
-    )
-    conn.commit()
-    conn.close()
-
-
 def get_all_bookings():
     conn = connect()
     data = conn.execute("SELECT * FROM bookings ORDER BY id DESC").fetchall()
@@ -163,7 +152,8 @@ def get_all_bookings():
     return data
 
 
-# ---------------- DASHBOARD CONTROLLERS ----------------
+# ---------------- DASHBOARD METRICS ----------------
+
 def total_cars():
     conn = connect()
     total = conn.execute("SELECT COUNT(*) FROM bookings").fetchone()[0]
@@ -180,23 +170,25 @@ def retrieved_cars():
 
 def active_drivers():
     conn = connect()
-    # Isolate specific name column components cleanly for simple iteration arrays
     drivers = conn.execute("SELECT name FROM drivers").fetchall()
     conn.close()
-    # Format database tuples neatly into a flat array string list
+    # Flattens database queries safely into a clean text string array list
     return [d[0] for d in drivers]
 
 
-# ---------------- PANDAS EXTENSIONS ----------------
+# ---------------- PANDAS EXTENSIONS FOR GRIDS & CHARTS ----------------
+
 def get_bookings_df():
+    """Fetches all operational system bookings directly into a clean Pandas DataFrame."""
     conn = connect()
-    query = "SELECT ticket, customer, phone, car_model, vehicle_number, arrival_time, driver, status, updated_time, current_lat, current_lon FROM bookings ORDER BY id DESC"
+    query = "SELECT ticket, customer, phone, car_model, vehicle_number, arrival_time, driver, status, updated_time FROM bookings ORDER BY id DESC"
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
 
 
 def get_customer_history_df(phone):
+    """Fetches a specific target customer history log map based on individual phone filters."""
     conn = connect()
     query = "SELECT ticket, car_model, vehicle_number, arrival_time, driver, status, updated_time FROM bookings WHERE phone=? ORDER BY id DESC"
     df = pd.read_sql_query(query, conn, params=(phone,))
