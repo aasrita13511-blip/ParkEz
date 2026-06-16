@@ -2,7 +2,8 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-DB_NAME = "parkez.db"
+# Consolidated to look at your primary active database file
+DB_NAME = "valet.db"
 
 
 def connect():
@@ -86,12 +87,17 @@ def register_customer(name, phone, password):
 
 def customer_login(phone, password):
     conn = connect()
+    # Pull out indices specifically matching data arrays
     data = conn.execute(
-        "SELECT * FROM customers WHERE phone=? AND password=?",
+        "SELECT name FROM customers WHERE phone=? AND password=?",
         (phone, password)
     ).fetchone()
     conn.close()
-    return data
+    
+    # Return just the raw user name string safely if row exists
+    if data:
+        return data[0]
+    return None
 
 
 # ---------------- DRIVER ----------------
@@ -157,7 +163,7 @@ def get_all_bookings():
     return data
 
 
-# ---------------- DASHBOARD ----------------
+# ---------------- DASHBOARD CONTROLLERS ----------------
 def total_cars():
     conn = connect()
     total = conn.execute("SELECT COUNT(*) FROM bookings").fetchone()[0]
@@ -174,9 +180,11 @@ def retrieved_cars():
 
 def active_drivers():
     conn = connect()
-    drivers = conn.execute("SELECT * FROM drivers").fetchall()
+    # Isolate specific name column components cleanly for simple iteration arrays
+    drivers = conn.execute("SELECT name FROM drivers").fetchall()
     conn.close()
-    return drivers
+    # Format database tuples neatly into a flat array string list
+    return [d[0] for d in drivers]
 
 
 # ---------------- PANDAS EXTENSIONS ----------------
