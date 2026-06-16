@@ -6,77 +6,77 @@ def apply_corporate_theme():
     <style>
         /* Global Background & Premium Typography */
         .stApp {
-            background-color: #F8FAFC !important;
+            background-color: #FFFFFF !important; /* Pure White Main Background */
             font-family: 'Inter', -apple-system, sans-serif !important;
         }
         
-        /* Premium Dark Navy Sidebar Redesign */
+        /* Light Theme Clean Sidebar Redesign (Fixes Dark Text Visibility Issues) */
         section[data-testid="stSidebar"] {
-            background-color: #0F172A !important; 
+            background-color: #FAFAFA !important; 
+            border-right: 1px solid #E5E7EB !important;
         }
         section[data-testid="stSidebar"] * {
-            color: #F1F5F9 !important;
+            color: #1F2937 !important; /* Rich Dark Slate text on your sidebar tabs */
             text-transform: uppercase !important;
             letter-spacing: 1px !important;
             font-size: 13px !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
         }
         
         /* Modern App Header Hero Banner */
         .brand-container {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem;
             background: #FFFFFF;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-            margin-bottom: 2rem;
-            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            border: 1px solid #FEE2E2;
         }
         .brand-title {
-            font-size: 42px !important;
+            font-size: 38px !important;
             font-weight: 800 !important;
-            color: #1E3A8A !important; 
+            color: #1F2937 !important; 
             margin: 0 !important;
-            letter-spacing: -1px !important;
         }
         .brand-accent {
-            color: #DC2626 !important; 
+            color: #DC2626 !important; /* Brand Red Accent */
         }
         .brand-tagline {
-            font-size: 16px !important;
-            color: #64748B !important; 
-            margin-top: 6px !important;
+            font-size: 15px !important;
+            color: #4B5563 !important; 
+            margin-top: 4px !important;
             font-weight: 500 !important;
         }
 
-        /* Commercial Form Input & Selectbox Styling */
+        /* Clean Form Input Boxes */
         div[data-testid="stMarkdownContainer"] p {
             font-weight: 600 !important;
-            color: #334155 !important;
+            color: #1F2937 !important;
             margin-bottom: 4px !important;
         }
         .stTextInput input, .stSelectbox div[data-baseweb="select"], .stTimeInput input {
             background-color: #FFFFFF !important;
-            border: 1px solid #CBD5E1 !important;
+            border: 1px solid #E5E7EB !important;
             border-radius: 8px !important;
             padding: 10px !important;
-            color: #0F172A !important;
+            color: #1F2937 !important;
         }
         
-        /* Clean Tab Design */
+        /* Red and White Tab Layout Design */
         div[data-testid="stTabs"] button {
-            font-size: 15px !important;
+            font-size: 14px !important;
             font-weight: 700 !important;
-            color: #64748B !important;
+            color: #4B5563 !important;
         }
         div[data-testid="stTabs"] button[aria-selected="true"] {
-            color: #DC2626 !important;
+            color: #DC2626 !important; /* Active indicator brand red */
             border-bottom: 3px solid #DC2626 !important;
         }
 
-        /* High-Conversion Full-Width Primary Buttons */
+        /* High-Conversion Full-Width Primary Red Buttons */
         div.stButton > button {
-            background-color: #DC2626 !important; 
+            background-color: #DC2626 !important; /* Bright Operational Red */
             color: #FFFFFF !important;
             font-weight: 700 !important;
             font-size: 15px !important;
@@ -84,26 +84,23 @@ def apply_corporate_theme():
             border-radius: 8px !important;
             border: none !important;
             width: 100% !important; 
-            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.15) !important;
-            transition: all 0.2s ease !important;
+            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1) !important;
         }
         div.stButton > button:hover {
-            background-color: #B91C1C !important; 
-            transform: translateY(-1px) !important;
+            background-color: #B91C1C !important; /* Darker red on hover event */
         }
         
-        /* Sleek Operational Metrics & Cards */
+        /* Metrics & Cards Display Layouts */
         div[data-testid="stMetricValue"] {
-            font-size: 32px !important;
+            font-size: 30px !important;
             font-weight: 800 !important;
-            color: #1E3A8A !important;
+            color: #DC2626 !important;
         }
         .driver-card, .card {
             background: #FFFFFF !important;
             padding: 20px !important;
             border-radius: 12px !important;
-            border: 1px solid #E2E8F0 !important;
-            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.02) !important;
+            border: 1px solid #FEE2E2 !important;
             margin-bottom: 15px !important;
         }
     </style>
@@ -114,8 +111,12 @@ def render_brand_header(subtitle_text):
     st.markdown(
         f"""
         <div class="brand-container">
-            <h1 class="brand-title">🚗 Park<span class="brand-accent">E</span>z</h1>
-            <p class="brand-tagline">{subtitle_text}</p>
+            <h1 style="text-align: center; margin: 0; font-size: 36px; font-weight: 800; color: #1F2937;">
+                🚗 Park<span style="color: #DC2626;">E</span>z
+            </h1>
+            <p style="text-align: center; margin: 4px 0 0 0; font-size: 15px; color: #4B5563; font-weight: 500;">
+                {subtitle_text}
+            </p>
         </div>
         """,
         unsafe_allow_html=True
