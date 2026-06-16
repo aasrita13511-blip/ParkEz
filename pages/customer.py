@@ -1,31 +1,16 @@
 import streamlit as st
 import random
 import pandas as pd
-from database import (
-    add_booking,
-    get_available_driver,
-    get_booking,
-    update_status,
-    get_customer_history_df
-)
+import folium
+from streamlit_folium import st_folium
+from database import add_booking, get_booking, update_status, get_customer_history_df
 from styles import apply_corporate_theme, render_brand_header
 
-st.set_page_config(
-    page_title="Customer Portal",
-    page_icon="🚗",
-    layout="wide"
-)
-
+st.set_page_config(page_title="Customer App Interface", page_icon="🚗", layout="wide")
 apply_corporate_theme()
-render_brand_header("Customer Operations Panel")
+render_brand_header("Customer Interactive Valet Space")
 
-tab1, tab2, tab3 = st.tabs(
-    [
-        "🚗 REQUEST VALET",
-        "🔑 RETRIEVE VEHICLE",
-        "📊 MY PARKING HISTORY"
-    ]
-)
+tab1, tab2, tab3 = st.tabs(["🚗 REQUEST VALET", "🔑 LIVE RADAR TRACKER", "📊 MY PARKING HISTORY"])
 
 # ================= REQUEST VALET =================
 with tab1:
@@ -39,60 +24,77 @@ with tab1:
     vehicle_number = st.text_input("Vehicle Number")
     arrival = st.time_input("Arrival Time")
 
-    if st.button("REQUEST DRIVER"):
+    if st.button("SUBMIT SERVICE REQUEST"):
         if name and phone and car_model and vehicle_number:
             ticket = "VAL" + str(random.randint(1000, 9999))
-            driver = get_available_driver()
-
-            add_booking((
-                ticket, name, phone, car_model, vehicle_number,
-                str(arrival), driver, "Driver Assigned", "Just Now"
-            ))
-
-            st.success("Valet Driver Assigned Successfully")
-            st.info(f"🎫 Ticket ID : {ticket}  \n🚘 Driver : {driver}  \n📍 Status : Driver Assigned")
+            add_booking((ticket, name, phone, car_model, vehicle_number, str(arrival), "Rahul", "Driver Assigned", "Just Now"))
+            st.success("Valet Request Sent to Systems Matrix!")
+            st.info(f"🎫 **Ticket ID Issued:** {ticket} | Copy this code to start telemetry tracking.")
         else:
-            st.warning("Please fill all details")
+            st.warning("Please input all configuration fields.")
 
-# ================= RETRIEVE & TRACK VEHICLE (STABLE MAP FRAGMENT) =================
+# ================= RETRIEVE & TRACK VEHICLE (FOLIUM TRACKER ENGINE) =================
 with tab2:
-    st.subheader("Request Vehicle Retrieval")
-    search_ticket = st.text_input("Enter Ticket ID to Track")
+    st.subheader("Interactive Tracking Matrix")
+    search_ticket = st.text_input("Enter Ticket ID to boot live tracking system")
 
     if search_ticket:
         booking = get_booking(search_ticket)
         if booking:
-            if st.button("🚨 REQUEST VEHICLE RETRIEVAL"):
+            if st.button("🚨 BROADCAST VEHICLE RETRIEVAL SIGNAL"):
                 update_status(search_ticket, "Vehicle Returning")
-                st.success("Driver has been notified!")
+                st.toast("⚡ Signal broadcast successfully to driver display panels!")
 
             st.divider()
-            st.subheader("📍 LIVE DRIVER LOCATOR MAP")
-
-            # --- CRITICAL: Safe auto-refresh component container block ---
+            
+            # --- SAFE WEB REFRESH SUBCOMPONENT FRAGMENT ---
             @st.fragment(run_every=4.0)
-            def render_live_tracker(t_id):
+            def run_radar_telemetry(t_id):
                 live_data = get_booking(t_id)
                 if live_data:
-                    # Map structural variables accurately matching index configurations
-                    current_status = live_data[8]
-                    lat = live_data[10] if live_data[10] is not None else 17.545
-                    lon = live_data[11] if live_data[11] is not None else 78.390
-
-                    st.info(f"**Current Vehicle Status:** {current_status} | **Last Updated:** {live_data[9]}")
+                    current_status = live_data
+                    lat = live_data if live_data is not None else 17.545
+                    lon = live_data if live_data is not None else 78.390
+                    driver_name = live_data if live_data is not None else "Assigned Driver"
                     
-                    # Package metrics array directly to map framework data grids
-                    map_df = pd.DataFrame({'lat': [lat], 'lon': [lon]})
-                    st.map(map_df, zoom=15)
+                    st.info(f"🛰️ **Live Operational Status:** {current_status} | **Driver En Route:** {driver_name}")
+                    
+                    # 1. Initialize Folium Baseline OpenStreetMap Canvas Engine
+                    m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True)
+                    
+                    # 2. Render moving driver target coordinate pin with interactive popup layout
+                    folium.Marker(
+                        [lat, lon],
+                        popup=f"<b>Your Valet Driver ({driver_name})</b><br>Status: {current_status}",
+                        tooltip="Click to view driver information",
+                        icon=folium.Icon(color='red', icon='car', prefix='fa')
+                    ).add_to(m)
+                    
+                    # 3. Add a fixed destination drop-off checkpoint hub marker (Pure White / Blue tint pin)
+                    folium.Marker(
+                        [17.5490, 78.3950],
+                        popup="<b>ParkEz Drop-off/Pickup Hub</b>",
+                        icon=folium.Icon(color='blue', icon='flag')
+                    ).add_to(m)
+                    
+                    # 4. Draw a clear navigational path line between the car and the pickup hub
+                    folium.PolyLine(
+                        locations=[[lat, lon], [17.5490, 78.3950]],
+                        color="#DC2626",
+                        weight=4,
+                        opacity=0.7
+                    ).add_to(m)
+                    
+                    # Render map inline directly within the view grids
+                    st_folium(m, width="100%", height=500, key=f"map_{lat}_{lon}")
                 else:
-                    st.error("Tracking signal disconnected.")
+                    st.error("Telemetry link lost.")
 
-            # Fire execution sequence safely inline
-            render_live_tracker(search_ticket)
+            run_radar_telemetry(search_ticket)
         else:
-            st.error("Ticket ID not found in system.")
+            st.error("Ticket hash index not detected inside database records.")
 
-# ================= PARKING HISTORY =================
+# ================= MY PARKING HISTORY =================
 with tab3:
     st.subheader("Your Completed Bookings")
     user_phone = st.session_state.get("user_phone", "")
@@ -102,6 +104,6 @@ with tab3:
             if not history_df.empty:
                 st.dataframe(history_df, use_container_width=True, hide_index=True)
             else:
-                st.info("No records found.")
+                st.info("No logs matched your records profiles.")
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Data link trace failed: {e}")
