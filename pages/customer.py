@@ -2,7 +2,6 @@ import streamlit as st
 import random
 import time
 import pandas as pd
-import numpy as np
 
 from database import (
     add_booking,
@@ -19,6 +18,7 @@ st.set_page_config(
     layout="wide"
 )
 
+# Apply global styling assets
 apply_corporate_theme()
 render_brand_header("Customer Operations Panel")
 
@@ -68,18 +68,14 @@ with tab2:
         booking = get_booking(ticket)
         if booking:
             update_status(ticket, "Vehicle Returning")
-            st.success("Driver has been notified")
+            st.success("Driver has been notified!")
             st.divider()
 
-            st.subheader("📍 LIVE DRIVER TRACKING MAP")
-            map_col, text_col = st.columns(2)
-
-            with text_col:
-                tracking = st.empty()
-                progress = st.progress(0)
-
-            with map_col:
-                map_placeholder = st.empty()
+            st.subheader("📍 LIVE DRIVER PROGRESS")
+            
+            # --- STABLE SIMULATION BLOCK (Fixes the React 185 loop crash) ---
+            status_box = st.empty()
+            progress_bar = st.progress(0)
 
             steps = [
                 "Driver Assigned 🚘",
@@ -89,21 +85,13 @@ with tab2:
                 "Arriving At Pickup Point ✅"
             ]
 
-            start_lat, start_lon = 17.545, 78.390 
-            end_lat, end_lon = 17.549, 78.395
-            lats = np.linspace(start_lat, end_lat, len(steps))
-            lons = np.linspace(start_lon, end_lon, len(steps))
-
-            for i, step in enumerate(steps):
-                time.sleep(1.2)
-                tracking.info(step)
-                progress.progress((i + 1) / len(steps))
-
-                map_df = pd.DataFrame({'lat': [lats[i]], 'lon': [lons[i]]})
-                map_placeholder.map(map_df, zoom=14)
+            for idx, step in enumerate(steps):
+                status_box.info(f"**Current Status:** {step}")
+                progress_bar.progress((idx + 1) / len(steps))
+                time.sleep(1)
 
             disp_driver = booking[7] if isinstance(booking, (list, tuple)) and len(booking) > 7 else "Assigned Valet"
-            st.success(f"Vehicle Ready!  \nETA : {leave_time}  \nDriver : {disp_driver}")
+            st.success(f"🎉 Your vehicle is ready at the pickup point!  \n⏱️ ETA: {leave_time}  \n👨‍✈️ Driver: {disp_driver}")
         else:
             st.error("Invalid Ticket ID")
 
