@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 from database import *
 
@@ -50,6 +51,7 @@ padding-top:2rem;
 div[data-testid="stMarkdownContainer"] p {
     font-weight: 600 !important;
     color: #1A202C !important;
+    margin-bottom: 4px !important;
 }
 
 /* Blue and Red Navigation Tab Setup Layout */
@@ -85,16 +87,25 @@ section[data-testid="stSidebar"] {
     border-right: none !important;
 }
 
-/* Force all text elements, links, spans, and navigation text in the sidebar to Pure White */
+/* 
+   PERMANENT SIDEBAR VISIBILITY & CAPITALIZATION FIX:
+   Targets all standard and dynamic Streamlit elements, raw links, text spans, 
+   and multi-page link widgets inside the navigation block.
+*/
 section[data-testid="stSidebar"] *, 
 section[data-testid="stSidebar"] span, 
 section[data-testid="stSidebarNavItems"] span,
 [data-testid="stSidebarNav"] a,
-[data-testid="stSidebarNav"] span {
-    color: #FFFFFF !important; /* Crisp white elements over dark background */
-    text-transform: uppercase !important;
+[data-testid="stSidebarNav"] span,
+div[data-testid="stSidebarNavItems"] *,
+ul[data-testid="stSidebarNavItems"] li *,
+.st-emotion-cache-16ids9d,
+.st-emotion-cache-6q9w0q,
+.st-emotion-cache-1707wwz {
+    color: #FFFFFF !important; /* Forces text color to pure white */
+    text-transform: uppercase !important; /* Forces letters to be in CAPITALS */
     letter-spacing: 1.2px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
 }
 
 /* Light Grey Feature Info Bubbles Layout */
@@ -158,186 +169,110 @@ div.stActionButton {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-"""
-<div class='big-title'>
-🚗 ParkEz
-</div>
+# ---------------- SAFE ROUTER WRAPPER ----------------
+# This ensures login details ONLY display on the main page canvas view
+current_script = os.path.basename(__file__)
 
-<div class='tagline'>
-Skip the Wait, Enjoy the Ride
-</div>
-""",
-unsafe_allow_html=True
-)
+if current_script == "app.py":
+    st.markdown(
+        """
+        <div class='big-title'>
+        🚗 ParkEz
+        </div>
 
-tab1, tab2 = st.tabs(
-    [
-        "🔐 LOGIN",
-        "📝 SIGN UP"
-    ]
-)
+        <div class='tagline'>
+        Skip the Wait, Enjoy the Ride
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-# ---------------- LOGIN ----------------
-
-with tab1:
-
-    role = st.selectbox(
-        "Login As",
+    tab1, tab2 = st.tabs(
         [
-            "Customer",
-            "Driver",
-            "Manager"
+            "🔐 LOGIN",
+            "📝 SIGN UP"
         ]
     )
 
-    phone = st.text_input(
-        "Enter Phone Number"
-    )
-
-    password = st.text_input(
-        "Enter Password",
-        type="password"
-    )
-
-    if st.button("LOGIN"):
-
-        if role == "Customer":
-
-            user = customer_login(
-                phone,
-                password
-            )
-
-            if user:
-
-                st.success(
-                    f"Welcome {user}"
-                )
-
-                st.switch_page(
-                    "pages/customer.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-        elif role == "Driver":
-
-            if (
-                phone == "8888888888"
-                and password == "1234"
-            ):
-
-                st.switch_page(
-                    "pages/driver.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-        elif role == "Manager":
-
-            if (
-                phone == "7777777777"
-                and password == "1234"
-            ):
-
-                st.switch_page(
-                    "pages/manager.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-# ---------------- SIGNUP ----------------
-
-with tab2:
-
-    st.subheader(
-        "Create Customer Account"
-    )
-
-    name = st.text_input(
-        "Full Name"
-    )
-
-    phone = st.text_input(
-        "Phone Number "
-    )
-
-    password = st.text_input(
-        "Password ",
-        type="password"
-    )
-
-    if st.button("SIGN UP"):
-
-        success = register_customer(
-            name,
-            phone,
-            password
+    # ---------------- LOGIN ----------------
+    with tab1:
+        role = st.selectbox(
+            "Login As",
+            ["Customer", "Driver", "Manager"],
+            key="login_role_select"
         )
+        phone = st.text_input("Enter Phone Number", key="login_phone_input")
+        password = st.text_input("Enter Password", type="password", key="login_password_input")
 
-        if success:
+        if st.button("LOGIN", key="login_submit_btn"):
+            if role == "Customer":
+                user = customer_login(phone, password)
+                if user:
+                    st.success(f"Welcome {user}")
+                    st.switch_page("pages/customer.py")
+                else:
+                    st.error("Invalid Credentials")
+            elif role == "Driver":
+                if phone == "8888888888" and password == "1234":
+                    st.switch_page("pages/driver.py")
+                else:
+                    st.error("Invalid Credentials")
+            elif role == "Manager":
+                if phone == "7777777777" and password == "1234":
+                    st.switch_page("pages/manager.py")
+                else:
+                    st.error("Invalid Credentials")
 
-            st.success(
-                "Account Created Successfully"
-            )
+    # ---------------- SIGNUP ----------------
+    with tab2:
+        st.subheader("Create Customer Account")
+        name = st.text_input("Full Name", key="signup_name_input")
+        phone_signup = st.text_input("Phone Number ", key="signup_phone_input")
+        password_signup = st.text_input("Password ", type="password", key="signup_pass_input")
 
-        else:
+        if st.button("SIGN UP", key="signup_submit_btn"):
+            success = register_customer(name, phone_signup, password_signup)
+            if success:
+                st.success("Account Created Successfully")
+            else:
+                st.error("Phone Number Already Exists")
 
-            st.error(
-                "Phone Number Already Exists"
-            )
+    # =====================================================================
+    # CUSTOMER & BUSINESS BENEFITS GRID (BELOW THE LOGIN FORM)
+    # =====================================================================
+    st.write("")
+    st.divider()
 
+    col_left, col_right = st.columns(2)
 
-# =====================================================================
-# CUSTOMER & BUSINESS BENEFITS GRID (BELOW THE LOGIN FORM)
-# =====================================================================
-st.write("")
-st.divider()
+    with col_left:
+        st.markdown("""
+            <div class="benefit-card">
+                <h4>For Customers</h4>
+                <ul>
+                    <li>Easy access to valet parking at crowded locations</li>
+                    <li>Request vehicle before leaving to reduce waiting time</li>
+                    <li>Real-time vehicle status updates</li>
+                    <li>Faster and convenient parking experience</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
 
-col_left, col_right = st.columns(2)
+    with col_right:
+        st.markdown("""
+            <div class="benefit-card">
+                <h4>For Businesses</h4>
+                <ul>
+                    <li>Provide valet service without hiring extra staff</li>
+                    <li>Improve customer experience</li>
+                    <li>Better parking operation management</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
 
-with col_left:
-    st.markdown("""
-        <div class="benefit-card">
-            <h4>For Customers</h4>
-            <ul>
-                <li>Easy access to valet parking at crowded locations</li>
-                <li>Request vehicle before leaving to reduce waiting time</li>
-                <li>Real-time vehicle status updates</li>
-                <li>Faster and convenient parking experience</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col_right:
-    st.markdown("""
-        <div class="benefit-card">
-            <h4>For Businesses</h4>
-            <ul>
-                <li>Provide valet service without hiring extra staff</li>
-                <li>Improve customer experience</li>
-                <li>Better parking operation management</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-
-# ================= FLOATING SUPPORT BUTTON LAYER =================
-with st.container():
-    st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
-    if st.button("💬", key="global_homepage_chat_action"):
-        st.switch_page("pages/support_chatbot.py")
-    st.markdown('</div>', unsafe_allow_html=True)
+    # ================= FLOATING SUPPORT BUTTON LAYER =================
+    with st.container():
+        st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
+        if st.button("💬", key="global_homepage_chat_action"):
+            st.switch_page("pages/support_chatbot.py")
+        st.markdown('</div>', unsafe_allow_html=True)

@@ -23,69 +23,111 @@ st.markdown("""
 <style>
 
 .stApp {
-    background-color:#F8F9FA !important;
-    font-family:'Inter',sans-serif !important;
+
+background-color:#F8F9FA !important;
+
+font-family:'Inter',sans-serif !important;
+
 }
+
 
 
 .portal-title{
+
 text-align:center;
+
 font-size:40px;
+
 font-weight:bold;
+
 color:#1A365D;
+
 }
+
+
 
 
 .benefit-card{
-    background:#EEEEEE;
-    border-radius:12px;
-    padding:24px;
-    min-height:160px;
+
+background:#EEEEEE;
+
+border-radius:12px;
+
+padding:24px;
+
+min-height:160px;
+
 }
+
 
 
 .benefit-card h3{
-    color:#1A202C;
-    font-size:20px;
+
+color:#1A202C;
+
+font-size:20px;
+
 }
+
 
 
 .benefit-card p{
-    color:#718096;
+
+color:#718096;
+
 }
 
+
+
+
+/* BUTTON STYLE */
 
 div.stButton > button{
-    background:#1A365D !important;
-    color:white !important;
-    border-radius:30px !important;
-    font-weight:bold !important;
-    width:100% !important;
+
+background:#1A365D !important;
+
+color:white !important;
+
+border-radius:30px !important;
+
+font-weight:bold !important;
+
+width:100% !important;
+
 }
 
 
+
+
+/* SIDEBAR DARK STYLE */
 
 section[data-testid="stSidebar"]{
-    background:#212529 !important;
+
+background:#212529 !important;
+
 }
 
-/* 
-   PERMANENT VISIBILITY & CAPITALIZATION FIX:
-   Forces all sidebar items into uppercase letters and overrides Streamlit's
-   default dark font color to a clear, high-contrast crisp white.
-*/
-section[data-testid="stSidebar"] *, 
-section[data-testid="stSidebar"] span, 
-section[data-testid="stSidebarNavItems"] span,
+
+
+/* SIDEBAR ALL TEXT CAPITAL */
+
+section[data-testid="stSidebar"] *,
 [data-testid="stSidebarNav"] a,
-[data-testid="stSidebarNav"] span,
-.st-emotion-cache-16ids9d,
-.st-emotion-cache-6q9w0q {
-    color: #FFFFFF !important; 
-    text-transform: uppercase !important; /* Forces all bar letters to be CAPITALS */
-    letter-spacing: 1.2px !important;
-    font-weight: 700 !important;
+[data-testid="stSidebarNav"] span {
+
+
+color:white !important;
+
+text-transform:uppercase !important;
+
+letter-spacing:1.2px !important;
+
+font-weight:700 !important;
+
+
 }
+
+
 
 </style>
 
@@ -93,20 +135,32 @@ section[data-testid="stSidebarNavItems"] span,
 
 
 
+
+
 # ---------------- TITLE ----------------
 
 
 st.markdown(
+
 """
 <div class="portal-title">
+
 👤 CUSTOMER PORTAL
+
 </div>
+
 """,
+
 unsafe_allow_html=True
+
 )
 
 
+
 st.divider()
+
+
+
 
 
 
@@ -114,138 +168,216 @@ st.divider()
 
 
 book,retrieve = st.tabs(
+
 [
 "🚗 REQUEST VALET",
 "🔑 RETRIEVE VEHICLE"
 ]
+
 )
 
 
 
 
-# ================= BOOK VALET =================
+
+# ================= REQUEST VALET =================
+
 
 
 with book:
 
 
-    st.subheader("Book Your Valet Driver")
+
+    st.subheader(
+    "Book Your Valet Driver"
+    )
 
 
-    name = st.text_input("Customer Name")
-
-    phone = st.text_input("Phone Number")
-
-    car_model = st.text_input("Car Model")
-
-    vehicle_number = st.text_input("Vehicle Number")
-
-    arrival = st.time_input("Arrival Time")
+    name = st.text_input(
+    "Customer Name"
+    )
 
 
+    phone = st.text_input(
+    "Phone Number"
+    )
 
-    if st.button("REQUEST DRIVER"):
+
+    car_model = st.text_input(
+    "Car Model"
+    )
+
+
+    vehicle_number = st.text_input(
+    "Vehicle Number"
+    )
+
+
+    arrival = st.time_input(
+    "Arrival Time"
+    )
+
+
+
+
+    if st.button(
+    "REQUEST DRIVER"
+    ):
 
 
         if name and phone and car_model and vehicle_number:
 
 
-            ticket = "VAL" + str(random.randint(1000,9999))
+
+            ticket = (
+
+            "VAL" +
+
+            str(random.randint(1000,9999))
+
+            )
+
 
 
             driver = get_available_driver()
 
 
+
             add_booking(
 
             (
+
             ticket,
+
             name,
+
             phone,
+
             car_model,
+
             vehicle_number,
+
             str(arrival),
+
             driver,
+
             "Driver Assigned",
+
             "Just Now"
+
             )
 
             )
+
 
 
             st.success(
-            "Valet Driver Assigned Successfully"
+            "VALET DRIVER ASSIGNED SUCCESSFULLY"
             )
 
 
+
             st.info(
+
 f"""
-🎫 Ticket ID : {ticket}
 
-🚘 Driver : {driver}
+🎫 TICKET ID : {ticket}
 
-📍 Status : Driver Assigned
+
+🚘 DRIVER : {driver}
+
+
+📍 STATUS : DRIVER ASSIGNED
+
 """
+
 )
+
+
+
 
 
         else:
 
+
             st.warning(
-            "Please fill all details"
+            "PLEASE FILL ALL DETAILS"
             )
 
 
 
 
 
-# ================= RETRIEVE =================
+
+
+# ================= RETRIEVE VEHICLE =================
+
 
 
 with retrieve:
 
 
-    st.subheader("Request Vehicle Retrieval")
+
+    st.subheader(
+    "REQUEST VEHICLE RETRIEVAL"
+    )
+
 
 
     ticket = st.text_input(
-    "Enter Ticket ID"
+    "ENTER TICKET ID"
     )
+
 
 
     leave_time = st.selectbox(
 
-    "When are you leaving?",
+    "WHEN ARE YOU LEAVING?",
 
     [
-    "2 Minutes",
-    "5 Minutes",
-    "10 Minutes"
+
+    "2 MINUTES",
+
+    "5 MINUTES",
+
+    "10 MINUTES"
+
     ]
 
     )
 
 
 
-    if st.button("BRING MY CAR"):
+
+    if st.button(
+    "BRING MY CAR"
+    ):
+
 
 
         booking = get_booking(ticket)
 
 
 
+
         if booking:
 
 
+
             update_status(
+
             ticket,
-            "Vehicle Returning"
+
+            "VEHICLE RETURNING"
+
             )
+
 
 
             st.success(
-            "Driver has been notified"
+            "DRIVER HAS BEEN NOTIFIED"
             )
+
 
 
             st.subheader(
@@ -261,19 +393,27 @@ with retrieve:
 
 
 
+
             steps=[
 
-            "Driver Assigned 🚘",
 
-            "Driver Going To Parking Area 📍",
+            "DRIVER ASSIGNED 🚘",
 
-            "Vehicle Located 🔎",
 
-            "Vehicle Moving 🚗",
+            "DRIVER GOING TO PARKING AREA 📍",
 
-            "Arriving At Pickup Point ✅"
+
+            "VEHICLE LOCATED 🔎",
+
+
+            "VEHICLE MOVING 🚗",
+
+
+            "ARRIVING AT PICKUP POINT ✅"
+
 
             ]
+
 
 
 
@@ -282,7 +422,9 @@ with retrieve:
 
                 time.sleep(1)
 
+
                 tracking.info(step)
+
 
                 progress.progress(
                 (i+1)/len(steps)
@@ -290,37 +432,51 @@ with retrieve:
 
 
 
+
             st.success(
+
 f"""
-Vehicle Ready!
+
+VEHICLE READY!
+
 
 ETA : {leave_time}
 
-Driver : {booking}
+
+DRIVER : {booking[7]}
+
 """
+
 )
+
+
+
 
 
         else:
 
 
             st.error(
-            "Invalid Ticket ID"
+            "INVALID TICKET ID"
             )
 
 
 
 
 
-# =================================================
-# EXPLORE PARK EZ FEATURES
-# =================================================
+
+
+
+
+# ================= FEATURES =================
+
 
 
 st.divider()
 
+
 st.markdown(
-"### Explore what you can do with ParkEz"
+"### EXPLORE WHAT YOU CAN DO WITH PARKEZ"
 )
 
 
@@ -330,53 +486,91 @@ col1,col2,col3 = st.columns(3)
 
 
 
-# BOOK SPOT
-
 
 with col1:
 
 
     st.markdown(
+
 """
 <div class="benefit-card">
 
-<h3>🚗 Book Spot</h3>
+<h3>🚗 BOOK SPOT</h3>
 
 <p>
-Reserve parking in advance.
-Skip waiting lines.
+Reserve parking before arrival.
 </p>
 
 </div>
 
 """,
+
 unsafe_allow_html=True
+
 )
 
 
 
     if st.button(
-    "Details",
+    "DETAILS",
     key="spot"
     ):
-        # Clean transition directly routing user to dedicated feature script
-        st.switch_page("pages/book_spot_details.py")
+
+
+        st.info(
+
+"""
+
+🚗 BOOK SPOT
+
+
+Reserve your parking before arrival.
+
+
+HOW IT WORKS:
+
+
+1. ENTER CUSTOMER DETAILS
+
+2. ADD VEHICLE DETAILS
+
+3. SELECT ARRIVAL TIME
+
+4. REQUEST VALET DRIVER
+
+5. RECEIVE TICKET ID
 
 
 
+BENEFITS:
 
 
-# MONTHLY PASS
+✓ NO WAITING QUEUES
+
+✓ QUICK DRIVER ASSIGNMENT
+
+✓ LIVE TRACKING
+
+✓ EASY RETRIEVAL
+
+
+"""
+
+)
+
+
+
 
 
 with col2:
 
 
     st.markdown(
+
 """
 <div class="benefit-card">
 
-<h3>📅 Monthly Pass</h3>
+<h3>📅 MONTHLY PASS</h3>
 
 <p>
 Fixed parking access for regular customers.
@@ -385,33 +579,68 @@ Fixed parking access for regular customers.
 </div>
 
 """,
+
 unsafe_allow_html=True
+
 )
 
 
 
     if st.button(
-    "Details",
+    "DETAILS",
     key="pass"
     ):
-        # Clean transition directly routing user to dedicated feature script
-        st.switch_page("pages/monthly_pass_details.py")
+
+
+        st.info(
+
+"""
+
+📅 MONTHLY PASS
+
+
+ENJOY EASIER PARKING WITH PARKEZ.
+
+
+FEATURES:
+
+
+✓ FIXED MONTHLY RATES
+
+✓ FASTER PARKING ACCESS
+
+✓ NO REPEATED BOOKINGS
+
+✓ CONVENIENT FOR REGULAR USERS
+
+
+
+PERFECT FOR:
+
+
+• OFFICE EMPLOYEES
+
+• FREQUENT VISITORS
+
+
+"""
+
+)
 
 
 
 
-
-# EV CHARGING
 
 
 with col3:
 
 
     st.markdown(
+
 """
 <div class="benefit-card">
 
-<h3>⚡ EV Charging</h3>
+<h3>⚡ EV CHARGING</h3>
 
 <p>
 Charge your EV while parked.
@@ -420,32 +649,64 @@ Charge your EV while parked.
 </div>
 
 """,
+
 unsafe_allow_html=True
+
 )
 
 
 
     if st.button(
-    "Details",
+    "DETAILS",
     key="ev"
     ):
-        # Clean transition directly routing user to dedicated feature script
-        st.switch_page("pages/ev_charging_details.py")
+
+
+        st.info(
+
+"""
+
+⚡ EV CHARGING
+
+
+CHARGE YOUR ELECTRIC VEHICLE WITH PARKEZ.
+
+
+FEATURES:
+
+
+✓ EV SUPPORT
+
+✓ SECURE PARKING
+
+✓ CHARGING WHILE PARKED
+
+✓ SAVES TIME
+
+
+
+AVAILABILITY DEPENDS ON VENUE.
+
+
+"""
+
+)
 
 
 
 
 
 
-# =================================================
-# CHATBOT BUTTON
-# =================================================
+
+# ================= CHATBOT =================
+
 
 
 if st.button(
 "💬",
 key="chat"
 ):
+
 
     st.switch_page(
     "pages/support_chatbot.py"

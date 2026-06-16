@@ -1,82 +1,29 @@
 import streamlit as st
-
-from database import *
-
-create_tables()
+import database as db
 
 st.set_page_config(
-    page_title="ParkEz",
-    page_icon="🚗",
+    page_title="Support Chatbot", 
+    page_icon="🤖",
     layout="wide"
 )
 
+# ---------------- Option 2 Theme Styling ----------------
 st.markdown("""
 <style>
-
-/* Global Canvas Background (Option 2 Muted Tone Setup) */
+/* Global Canvas Background Adjustments */
 .stApp {
     background-color: #F8F9FA !important; 
     font-family: 'Inter', -apple-system, sans-serif !important;
 }
 
-.big-title{
-text-align:center;
-font-size:65px;
-font-weight:bold;
-color:#1A365D; /* Corporate Deep Blue Accent */
+/* Header Text Theme Styling */
+h1 {
+    color: #1A365D !important; /* Corporate Deep Blue */
+    font-weight: 800 !important;
 }
-
-.tagline{
-text-align:center;
-font-size:25px;
-color:#718096; /* Modern Slate Grey Muted Description Text */
-margin-bottom:40px;
-}
-
-.block-container{
-padding-top:2rem;
-}
-
-/* Modern Clean Styling overrides for Text Fields & Selection Boxes */
-.stTextInput input, .stSelectbox div[data-baseweb="select"] {
-    background-color: #FFFFFF !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 8px !important;
-    color: #1A202C !important;
-    padding: 10px !important;
-}
-
-/* Option 2 Input Labels Typography */
-div[data-testid="stMarkdownContainer"] p {
-    font-weight: 600 !important;
-    color: #1A202C !important;
-}
-
-/* Blue and Red Navigation Tab Setup Layout */
-div[data-testid="stTabs"] button {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #718096 !important;
-}
-div[data-testid="stTabs"] button[aria-selected="true"] {
-    color: #DE2910 !important; /* Active indicator brand operational red */
-    border-bottom: 3px solid #DE2910 !important;
-}
-
-/* Primary High-Conversion Corporate Blue Button Layout */
-div.stButton > button {
-    background-color: #1A365D !important; /* Brand Corporate Deep Blue Canvas */
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-    padding: 12px 24px !important;
-    border-radius: 30px !important; /* Premium rounded pill shape adjustments */
-    border: none !important;
-    width: 100% !important; 
-    box-shadow: 0 4px 6px -1px rgba(26, 54, 93, 0.1) !important;
-}
-div.stButton > button:hover {
-    background-color: #122542 !important; /* Darker navy shade applied on active hover */
+h3 {
+    color: #718096 !important; /* Muted Slate Grey */
+    font-weight: 500 !important;
 }
 
 /* High-Contrast Charcoal Sidebar Layout Base */
@@ -86,9 +33,9 @@ section[data-testid="stSidebar"] {
 }
 
 /* 
-   PERMANENT VISIBILITY BUG FIX:
-   Force all deeply nested Streamlit page list links, text nodes, spans, 
-   and utility selectors within the sidebar container area to pure white.
+   PERMANENT VISIBILITY & CAPITALIZATION FIX:
+   Forces all sidebar items into uppercase letters and overrides Streamlit's
+   default dark font color to a clear, high-contrast crisp white.
 */
 section[data-testid="stSidebar"] *, 
 section[data-testid="stSidebar"] span, 
@@ -97,253 +44,131 @@ section[data-testid="stSidebarNavItems"] span,
 [data-testid="stSidebarNav"] span,
 .st-emotion-cache-16ids9d,
 .st-emotion-cache-6q9w0q {
-    color: #FFFFFF !important; /* Crisp white elements over dark background */
-    text-transform: uppercase !important;
+    color: #FFFFFF !important; 
+    text-transform: uppercase !important; /* Forces all sidebar letters to be CAPITALS */
     letter-spacing: 1.2px !important;
-    font-weight: 600 !important;
-}
-
-/* Light Grey Feature Info Bubbles Layout */
-.benefit-section-title {
-    color: #1A365D !important;
     font-weight: 700 !important;
-    margin-top: 20px !important;
-    margin-bottom: 15px !important;
-}
-.benefit-card {
-    background-color: #EEEEEE !important; /* Solid light grey bubble background */
-    border-radius: 12px !important;
-    padding: 20px !important;
-    min-height: 180px !important;
-    margin-bottom: 15px;
-}
-.benefit-card h4 {
-    color: #1A365D !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    margin: 0 0 10px 0 !important;
-}
-.benefit-card ul {
-    margin: 0 !important;
-    padding-left: 20px !important;
-}
-.benefit-card li {
-    color: #4B5563 !important;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    margin-bottom: 6px !important;
-    font-weight: 500 !important;
 }
 
-/* --- FLOATING CHAT BUTTON POSITIONING --- */
-div.stActionButton {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 999999;
+/* Modern Input Boxes overrides */
+div[data-testid="stChatInput"] textarea {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    color: #1A202C !important;
 }
-.stActionButton button {
-    background-color: #ff4b4b !important;
-    color: white !important;
-    border-radius: 50% !important;
-    width: 60px !important;
-    height: 60px !important;
-    font-size: 28px !important;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.3) !important;
-    border: none !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-.stActionButton button:hover {
-    background-color: #e04040 !important;
-    transform: scale(1.05) !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-"""
-<div class='big-title'>
-🚗 ParkEz
-</div>
+st.title("💬 ParkEz Support Chatbot")
+st.subheader("How can we help you today?")
 
-<div class='tagline'>
-Skip the Wait, Enjoy the Ride
-</div>
-""",
-unsafe_allow_html=True
-)
-
-tab1, tab2 = st.tabs(
-    [
-        "🔐 LOGIN",
-        "📝 SIGN UP"
+# Initialize chat history using session state
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hello! I am your ParkEz assistant. Ask me anything about how the app works, valet requests, vehicle retrieval, hours, pricing, or track your live ticket status!"}
     ]
-)
 
-# ---------------- LOGIN ----------------
+# Render message history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-with tab1:
+# Dictionary containing all 50 pre-programmed responses
+RESPONSES = {
+    # Greetings & Core Assistance
+    "hi": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "hello": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "hey": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "greetings": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "good morning": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "good afternoon": "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?",
+    "how are you": "I am doing great and ready to assist you! How can I help make your parking experience seamless today?",
+    "who are you": "I am the ParkEz Virtual Assistant, here to guide you through bookings, vehicle tracking, and account help.",
+    "your name": "I am the ParkEz Virtual Assistant, here to guide you through bookings, vehicle tracking, and account help.",
+    "help": "I can help you look up live parking ticket statuses, request drivers, explain retrieval times, or troubleshoot app settings.",
+    "what can you do": "I can help you look up live parking ticket statuses, request drivers, explain retrieval times, or troubleshoot app settings.",
+    "features": "I can help you look up live parking ticket statuses, request drivers, explain retrieval times, or troubleshoot app settings.",
+    "bye": "You're very welcome! Thank you for choosing ParkEz. Enjoy your ride, and let us know if you need anything else later.",
+    "goodbye": "You're very welcome! Thank you for choosing ParkEz. Enjoy your ride, and let us know if you need anything else later.",
+    "thanks": "You're very welcome! Thank you for choosing ParkEz. Enjoy your ride, and let us know if you need anything else later.",
+    "thank you": "You're very welcome! Thank you for choosing ParkEz. Enjoy your ride, and let us know if you need anything else later.",
 
-    role = st.selectbox(
-        "Login As",
-        [
-            "Customer",
-            "Driver",
-            "Manager"
-        ]
+    # Booking & Valet Requests
+    "how to book": "To request a valet driver, head to your Customer Portal, fill in your Name, Phone Number, Car Model, and Vehicle Number, then click 'REQUEST DRIVER'.",
+    "request valet": "To request a valet driver, head to your Customer Portal, fill in your Name, Phone Number, Car Model, and Vehicle Number, then click 'REQUEST DRIVER'.",
+    "who is my driver": "Our system automatically matches you with an available professional driver nearby (such as Rahul, Arjun, or Vikram) the moment you submit a request.",
+    "driver assignment": "Our system automatically matches you with an available professional driver nearby (such as Rahul, Arjun, or Vikram) the moment you submit a request.",
+    "how long to assign": "Driver matching happens instantly! A valet driver is usually assigned to your ticket within a few seconds of clicking request.",
+    "assignment time": "Driver matching happens instantly! A valet driver is usually assigned to your ticket within a few seconds of clicking request.",
+    "cancel booking": "Once a driver has picked up your vehicle, the operation cannot be canceled. If you need your car back immediately, go to the 'RETRIEVE VEHICLE' tab.",
+    "cancel request": "Once a driver has picked up your vehicle, the operation cannot be canceled. If you need your car back immediately, go to the 'RETRIEVE VEHICLE' tab.",
+    "multiple cars": "Currently, each customer account processes one active ticket at a time. To book another car, submit an additional request once the active transaction concludes.",
+    "book two cars": "Currently, each customer account processes one active ticket at a time. To book another car, submit an additional request once the active transaction concludes.",
+    "pre book": "Yes! You can use the 'Arrival Time' selector in the Request Valet tab to let our driver network know exactly when you plan to arrive at the venue.",
+    "reserve in advance": "Yes! You can use the 'Arrival Time' selector in the Request Valet tab to let our driver network know exactly when you plan to arrive at the venue.",
+    "valet location": "Drive directly to the designated ParkEz valet drop-off zone at your venue entrance. Our assigned driver will meet you right there.",
+    "where to drop": "Drive directly to the designated ParkEz valet drop-off zone at your venue entrance. Our assigned driver will meet you right there.",
+    "wrong car info": "If you submitted the wrong car model or vehicle number, please inform the driver directly upon arrival or contact venue management to fix the ticket.",
+    "change vehicle details": "If you submitted the wrong car model or vehicle number, please inform the driver directly upon arrival or contact venue management to fix the ticket.",
+    "valet cost": "Standard parking fees vary depending on your location and venue agreement. Rates will be displayed clearly on your portal screen before booking.",
+    "is parking free": "Standard parking fees vary depending on your location and venue agreement. Rates will be displayed clearly on your portal screen before booking.",
+    "driver didn't show": "If your driver is taking longer than expected, verify your live status tracking window on the dashboard or request support from the manager panel.",
+    "where is my driver": "If your driver is taking longer than expected, verify your live status tracking window on the dashboard or request support from the manager panel.",
+
+    # Vehicle Retrieval & Tracking
+    "how to get my car": "To get your car back, go to the '🔑 RETRIEVE VEHICLE' tab, enter your unique Ticket ID, select your leaving window, and press 'BRING MY CAR'.",
+    "retrieve vehicle": "To get your car back, go to the '🔑 RETRIEVE VEHICLE' tab, enter your unique Ticket ID, select your leaving window, and press 'BRING MY CAR'.",
+    "what is a ticket id": "Your Ticket ID is a unique code (e.g., VAL1234) generated automatically on your screen as soon as your valet request is confirmed.",
+    "where is my ticket": "Your Ticket ID is a unique code (e.g., VAL1234) generated automatically on your screen as soon as your valet request is confirmed.",
+    "lost my ticket": "Don't worry! If you lose your Ticket ID, the Venue Manager can look up your registration details using your registered phone number via the Manager Dashboard.",
+    "forgot ticket id": "Don't worry! If you lose your Ticket ID, the Venue Manager can look up your registration details using your registered phone number via the Manager Dashboard.",
+    "what is live tracking": "Our live tracking system updates you instantly through 5 milestones: Driver Assigned, Moving to Lot, Parked, Vehicle Moving, and Ready at Pickup Point.",
+    "track my car": "Our live tracking system updates you instantly through 5 milestones: Driver Assigned, Moving to Lot, Parked, Vehicle Moving, and Ready at Pickup Point.",
+    "how long to retrieve": "Average vehicle retrieval takes approximately 3 to 10 minutes, depending on the leaving window option you select when requesting your car.",
+    "retrieval eta": "Average vehicle retrieval takes approximately 3 to 10 minutes, depending on the leaving window option you select when requesting your car.",
+    "can i change retrieval time": "Retrieval requests dispatch drivers immediately. If your plans change, let the drop-off booth attendants know right away.",
+}
+# ================= CHATBOT RESPONSE ENGINE =================
+
+def get_response(user_input):
+
+    user_input = user_input.lower().strip()
+
+    for question, answer in RESPONSES.items():
+
+        if question in user_input:
+            return answer
+
+    return (
+        "Sorry, I could not understand that. "
+        "Please ask about booking, valet service, vehicle retrieval, "
+        "ticket ID, driver status, or ParkEz features."
     )
 
-    phone = st.text_input(
-        "Enter Phone Number"
+
+# CHAT INPUT
+
+if prompt := st.chat_input("Ask me anything about ParkEz..."):
+
+
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": prompt
+        }
     )
 
-    password = st.text_input(
-        "Enter Password",
-        type="password"
+
+    response = get_response(prompt)
+
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": response
+        }
     )
 
-    if st.button("LOGIN"):
 
-        if role == "Customer":
-
-            user = customer_login(
-                phone,
-                password
-            )
-
-            if user:
-
-                st.success(
-                    f"Welcome {user}"
-                )
-
-                st.switch_page(
-                    "pages/customer.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-        elif role == "Driver":
-
-            if (
-                phone == "8888888888"
-                and password == "1234"
-            ):
-
-                st.switch_page(
-                    "pages/driver.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-        elif role == "Manager":
-
-            if (
-                phone == "7777777777"
-                and password == "1234"
-            ):
-
-                st.switch_page(
-                    "pages/manager.py"
-                )
-
-            else:
-
-                st.error(
-                    "Invalid Credentials"
-                )
-
-# ---------------- SIGNUP ----------------
-
-with tab2:
-
-    st.subheader(
-        "Create Customer Account"
-    )
-
-    name = st.text_input(
-        "Full Name"
-    )
-
-    phone = st.text_input(
-        "Phone Number "
-    )
-
-    password = st.text_input(
-        "Password ",
-        type="password"
-    )
-
-    if st.button("SIGN UP"):
-
-        success = register_customer(
-            name,
-            phone,
-            password
-        )
-
-        if success:
-
-            st.success(
-                "Account Created Successfully"
-            )
-
-        else:
-
-            st.error(
-                "Phone Number Already Exists"
-            )
-
-
-# =====================================================================
-# CUSTOMER & BUSINESS BENEFITS GRID (BELOW THE LOGIN FORM)
-# =====================================================================
-st.write("")
-st.divider()
-
-col_left, col_right = st.columns(2)
-
-with col_left:
-    st.markdown("""
-        <div class="benefit-card">
-            <h4>For Customers</h4>
-            <ul>
-                <li>Easy access to valet parking at crowded locations</li>
-                <li>Request vehicle before leaving to reduce waiting time</li>
-                <li>Real-time vehicle status updates</li>
-                <li>Faster and convenient parking experience</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col_right:
-    st.markdown("""
-        <div class="benefit-card">
-            <h4>For Businesses</h4>
-            <ul>
-                <li>Provide valet service without hiring extra staff</li>
-                <li>Improve customer experience</li>
-                <li>Better parking operation management</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-
-# ================= FLOATING SUPPORT BUTTON LAYER =================
-with st.container():
-    st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
-    if st.button("💬", key="global_homepage_chat_action"):
-        st.switch_page("pages/support_chatbot.py")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.rerun()

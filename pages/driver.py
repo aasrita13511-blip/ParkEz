@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import datetime
-import time
 
 from database import (
     get_all_bookings,
@@ -59,19 +58,15 @@ div.stButton > button:hover {
     background-color: #122542 !important; /* Darker blue on hover event */
 }
 
-/* High-Contrast Charcoal Dark Slate Sidebar Layout Adjustments */
-section[data-testid="stSidebar"] {
-    background-color: #212529 !important; 
-    border-right: none !important;
+/* --- ADDED THIS HERE TO KEEP THE SIDEBAR IN CAPITALS --- */
+section[data-testid="stSidebar"], section[data-testid="stSidebar"] * {
+    background-color: #212529 !important; /* High-Contrast Charcoal Dark Slate Sidebar */
+    color: #FFFFFF !important; /* Pure White text on dark sidebar options */
 }
-
-/* Force all text elements, links, spans, and navigation text in the sidebar to Pure White */
 section[data-testid="stSidebar"] *, 
-section[data-testid="stSidebar"] span, 
-section[data-testid="stSidebarNavItems"] span,
-[data-testid="stSidebarNav"] a,
-[data-testid="stSidebarNav"] span {
-    color: #FFFFFF !important; /* Crisp white elements over dark background */
+[data-testid="stSidebarNavItems"] *,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] a {
     text-transform: uppercase !important;
     letter-spacing: 1.2px !important;
     font-weight: 600 !important;
@@ -127,7 +122,7 @@ else:
     for booking in bookings:
 
 
-        # RE-ESTABLISHED CORRECT ROW EXTRACTION INDEX KEYS HERE
+
         ticket = booking[1]
         customer = booking[2]
         phone = booking[3]
@@ -218,13 +213,13 @@ else:
                     key=ticket+"pickup"
                 ):
 
-                    current_time_str = datetime.now().strftime("%I:%M %p")
 
-                    # Commits status text and independent, real-time dynamic timestamp parameters
                     update_status(
+
                         ticket,
-                        "Picked Up",
-                        current_time_str
+
+                        "Picked Up"
+
                     )
 
 
@@ -237,12 +232,10 @@ Picked Up
 
 Time:
 
-{current_time_str}
+{datetime.now().strftime("%I:%M %p")}
 
 """
                     )
-                    time.sleep(0.4)
-                    st.rerun()
 
 
 
@@ -255,13 +248,13 @@ Time:
                     key=ticket+"park"
                 ):
 
-                    current_time_str = datetime.now().strftime("%I:%M %p")
 
-                    # Commits status text and independent, real-time dynamic timestamp parameters
                     update_status(
+
                         ticket,
-                        "Parked Vehicle",
-                        current_time_str
+
+                        "Parked Vehicle"
+
                     )
 
 
@@ -274,12 +267,10 @@ Parked Vehicle
 
 Time:
 
-{current_time_str}
+{datetime.now().strftime("%I:%M %p")}
 
 """
                     )
-                    time.sleep(0.4)
-                    st.rerun()
 
 
 
@@ -292,13 +283,13 @@ Time:
                     key=ticket+"deliver"
                 ):
 
-                    current_time_str = datetime.now().strftime("%I:%M %p")
 
-                    # Commits status text and independent, real-time dynamic timestamp parameters
                     update_status(
+
                         ticket,
-                        "Delivered Vehicle",
-                        current_time_str
+
+                        "Delivered Vehicle"
+
                     )
 
 
@@ -311,12 +302,10 @@ Delivered Vehicle
 
 Time:
 
-{current_time_str}
+{datetime.now().strftime("%I:%M %p")}
 
 """
                     )
-                    time.sleep(0.4)
-                    st.rerun()
 
 
 
