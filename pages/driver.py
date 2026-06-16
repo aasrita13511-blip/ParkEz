@@ -19,12 +19,17 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+/* Global Canvas Background Adjustments */
+.stApp {
+    background-color: #F8F9FA !important; /* Soft Premium Off-White Canvas */
+    font-family: 'Inter', -apple-system, sans-serif !important;
+}
 
 .title{
 text-align:center;
 font-size:42px;
 font-weight:bold;
-color:#0B3D91;
+color:#1A365D; /* Corporate Deep Blue Accent */
 }
 
 
@@ -32,11 +37,32 @@ color:#0B3D91;
 background:white;
 padding:25px;
 border-radius:20px;
-box-shadow:0px 5px 15px #ddd;
+box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+border: 1px solid #E2E8F0;
 margin-bottom:20px;
 }
 
+/* Option 2 Premium Corporate Button Overrides */
+div.stButton > button {
+    background-color: #1A365D !important; /* Brand Deep Blue Call-to-Action */
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    padding: 12px 24px !important;
+    border-radius: 30px !important; /* Elegant modern pill buttons */
+    border: none !important;
+    width: 100% !important; 
+    box-shadow: 0 4px 6px -1px rgba(26, 54, 93, 0.1) !important;
+}
+div.stButton > button:hover {
+    background-color: #122542 !important; /* Darker blue on hover event */
+}
+
 /* --- ADDED THIS HERE TO KEEP THE SIDEBAR IN CAPITALS --- */
+section[data-testid="stSidebar"], section[data-testid="stSidebar"] * {
+    background-color: #212529 !important; /* High-Contrast Charcoal Dark Slate Sidebar */
+    color: #FFFFFF !important; /* Pure White text on dark sidebar options */
+}
 section[data-testid="stSidebar"] *, 
 [data-testid="stSidebarNavItems"] *,
 section[data-testid="stSidebar"] span,

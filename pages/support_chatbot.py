@@ -1,100 +1,159 @@
-import streamlit as st
-import database as db
-
-st.set_page_config(page_title="Support Chatbot", page_icon="🤖")
-st.title("💬 ParkEz Support Chatbot")
-st.subheader("How can we help you today?")
-
-# Initialize chat history using session state
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Hello! I am your ParkEz assistant. Ask me about our parking slots, digital tickets, refunds, cancellations, payment options, or live booking statuses."}
-    ]
-
-# Render message history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
 # Intelligent rule engine reading from your exact fields
 def process_reply(user_text):
-    text = user_text.lower()
-    
-    # 1. Product Knowledge (Mapped to your homepage/customer valet services)
-    if any(k in text for k in ["product", "item", "stock", "parking", "spot", "pass", "service"]):
-        return ("Our customer page features our on-demand interactive Valet Space service. "
-                "You can request available valet drivers (like Rahul, Arjun, or Vikram) to safely park and manage your car.")
-    
-    # 2. Delivery Questions
-    elif any(k in text for k in ["delivery", "ship", "arrive", "mail", "sent"]):
-        return ("Our parking passes are entirely digital! As soon as you click 'REQUEST DRIVER', "
-                "your unique tracking Ticket ID is generated instantly on your dashboard.")
-    
-    # 3. Refunds
+
+    text = user_text.lower().strip(".,!?:;()\"'")
+
+
+    # =====================================================================
+    # 50 EXPANDED KNOWLEDGE BASE QUESTIONS & ANSWERS MAPPING
+    # =====================================================================
+
+
+    # Category 1: Greetings & Core Assistance
+
+    if text in ["hi", "hello", "hey", "greetings", "good morning", "good afternoon"]:
+        return "Hello! Welcome to ParkEz Support. How can I assist you with your valet parking or vehicle retrieval today?"
+
+    elif "how are you" in text:
+        return "I am doing great and ready to assist you! How can I help make your parking experience seamless today?"
+
+    elif "who are you" in text or "your name" in text:
+        return "I am the ParkEz Virtual Assistant, here to guide you through bookings, vehicle tracking, and account help."
+
+    elif any(k in text for k in ["help", "what can you do", "features"]):
+        return "I can help you with valet booking, driver assignment, vehicle tracking, retrieval, pricing, and account support."
+
+    elif text in ["bye", "goodbye", "thanks", "thank you"]:
+        return "You're very welcome! Thank you for choosing ParkEz. Enjoy your ride!"
+
+
+    # Category 2: Booking & Valet Requests
+
+
+    elif "how to book" in text or "request valet" in text:
+        return "To request a valet driver, go to Customer Portal, enter Name, Phone Number, Car Model, and Vehicle Number, then click REQUEST DRIVER."
+
+    elif "who is my driver" in text or "driver assignment" in text:
+        return "Our system automatically assigns an available professional valet driver after your request is submitted."
+
+    elif "how long to assign" in text or "assignment time" in text:
+        return "Driver assignment happens within a few seconds depending on driver availability."
+
+    elif "cancel booking" in text or "cancel request" in text:
+        return "You can cancel your request before vehicle processing starts. Contact support if you need help."
+
+    elif "multiple cars" in text or "book two cars" in text:
+        return "Each customer can have one active booking at a time. Create another request after completing the current one."
+
+    elif "pre book" in text or "reserve in advance" in text:
+        return "Yes, you can select your expected arrival time while requesting valet service."
+
+    elif "where to drop" in text or "valet location" in text:
+        return "Please arrive at the ParkEz valet drop-off zone. Your assigned driver will assist you."
+
+    elif "wrong car info" in text or "change vehicle details" in text:
+        return "Please contact the manager to update your vehicle information."
+
+    elif "valet cost" in text or "parking free" in text:
+        return "Parking charges depend on the venue. Prices will be shown before booking."
+
+    elif "driver didn't show" in text or "where is my driver" in text:
+        return "Check your booking status. If your driver is delayed, contact support."
+
+
+    # Category 3: Retrieval & Tracking
+
+
+    elif "retrieve vehicle" in text or "get my car" in text:
+        return "Open Retrieve Vehicle, enter your Ticket ID, select leaving time, and request your vehicle."
+
+    elif "ticket id" in text or "where is my ticket" in text:
+        return "Your Ticket ID is generated after booking confirmation. Example: VAL1234."
+
+    elif "lost ticket" in text or "forgot ticket id" in text:
+        return "Contact the venue manager. They can find your booking using your registered phone number."
+
+    elif "track my car" in text or "live tracking" in text:
+        return "Vehicle tracking shows Driver Assigned, Moving, Parked, Retrieval Started, and Ready for Pickup."
+
+    elif "how long to retrieve" in text or "retrieval eta" in text:
+        return "Vehicle retrieval usually takes around 3-10 minutes depending on parking location."
+
+    elif "change leaving time" in text:
+        return "Contact the valet team if you need to update your retrieval time."
+
+    elif "pickup point" in text:
+        return "Your vehicle will be delivered to the ParkEz pickup point."
+
+    elif "is my car ready" in text:
+        return "Enter your Ticket ID to check your vehicle status."
+
+    elif "progress bar" in text:
+        return "The progress bar updates as your vehicle moves through each retrieval stage."
+
+
+    # Category 4: Account & Login
+
+
+    elif "login roles" in text or "account type" in text:
+        return "ParkEz supports Customer, Driver, and Manager accounts."
+
+    elif "driver login" in text:
+        return "Drivers login using their registered phone number and assigned password."
+
+    elif "manager login" in text:
+        return "Manager access is only available for authorized administrators."
+
+    elif "logout" in text:
+        return "Use the navigation panel to return to the login page."
+
+    elif "change password" in text or "reset pin" in text:
+        return "Password reset can be requested through your administrator."
+
+
+    # Category 5: Safety & Operations
+
+
+    elif "operating hours" in text or "open now" in text:
+        return "ParkEz availability depends on venue operating hours."
+
+    elif "is my car safe" in text or "insurance" in text:
+        return "Your vehicle is handled by verified valet drivers and monitored parking operations."
+
+    elif "no driver available" in text:
+        return "Your request will stay in queue until a driver becomes available."
+
+    elif "overnight parking" in text:
+        return "Overnight parking depends on venue rules."
+
+    elif "valet benefits" in text or "why use parkez" in text:
+        return "ParkEz saves time, reduces waiting, provides secure valet service, and makes vehicle retrieval easier."
+
+    elif "feedback" in text:
+        return "We appreciate your feedback. It helps us improve ParkEz."
+
+    elif "complaint" in text or "issue" in text:
+        return "Please contact support or the venue manager for assistance."
+
+
+    # Extra Support Questions
+
+
+    elif "payment" in text or "pay" in text:
+        return "Payment options depend on the venue and available services."
+
     elif "refund" in text:
-        return "Valet booking adjustments or refunds are processed back to your payment card statement within 5-7 business days."
-    
-    # 4. Returns (Cancellations)
-    elif "return" in text:
-        return "Digital ticket slots cannot be returned, but you can request vehicle retrieval immediately via the 'LIVE STATUS TRACKER' panel tab."
-    
-    # 5. Payment Methods
-    elif any(k in text for k in ["payment", "pay", "card", "credit", "cash"]):
-        return "We accept all major secure Credit/Debit cards, digital tokens, and mobile banking systems."
-    
-    # 6. Order Status (Dynamic Database Extraction matching customer.py structure)
-    elif any(k in text for k in ["order", "status", "track", "booking", "ticket", "val"]):
-        words = text.split()
-        ticket_found = None
-        for word in words:
-            # Look for your ticket pattern containing digits or starting with 'val'
-            if "val" in word or (len(word) >= 4 and any(char.isdigit() for char in word)):
-                ticket_found = word.upper().strip(".,!?")
-                break
-                
-        if ticket_found:
-            booking = db.get_booking(ticket_found)
-            if booking:
-                # Based on your database schema: index 7 is driver, index 8 is status
-                driver_name = booking[7] if len(booking) > 7 else "Assigned Driver"
-                current_status = booking[8] if len(booking) > 8 else "Driver Assigned"
-                
-                # Format live milestone strings matching your portal timeline
-                step_info = ""
-                if current_status == "Driver Assigned":
-                    step_info = "🔵 **STEP 1/4:** Driver Confirmed."
-                elif current_status == "Picked Up":
-                    step_info = "🟠 **STEP 2/4:** Vehicle Picked Up."
-                elif current_status == "Parked Vehicle":
-                    step_info = "🟢 **STEP 3/4:** Secured in Lot."
-                elif current_status == "Vehicle Returning":
-                    step_info = "🔴 **STEP 4/4:** Vehicle Returning!"
-                elif current_status == "Delivered Vehicle":
-                    step_info = "✅ **COMPLETE:** Car Delivered!"
-                else:
-                    step_info = f"🔄 **Current State:** {current_status}"
+        return "Refund requests can be handled through venue management."
 
-                return f"🔍 **Ticket Look-Up:** `{ticket_found}`\n\n* **Assigned Driver:** {driver_name}\n* **Live Progress:** {step_info}"
-            else:
-                return f"I couldn't find ticket ID **{ticket_found}** in our active database. Please verify the code and try again."
-        
-        return "To check your live booking or order status instantly, type your inquiry along with your exact **Ticket ID** (e.g., 'What is the status of ticket VAL1234?')."
-        
-    # Default fallback response
+    elif "location" in text:
+        return "ParkEz is available at partnered venues."
+
+    elif "app not working" in text:
+        return "Please refresh the app and check your internet connection."
+
+    elif "thank" in text:
+        return "You're welcome! Enjoy using ParkEz 🚗"
+
+
     else:
-        return "I didn't quite catch that. Could you please specify if you have questions regarding products, delivery, refunds, returns, payments, or order status?"
-
-# Capture user input using st.chat_input
-if prompt := st.chat_input("Ask a support question..."):
-    # Display user query
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # Process rule-based matching reply
-    bot_reply = process_reply(prompt)
-    
-    # Display assistant message
-    with st.chat_message("assistant"):
-        st.markdown(bot_reply)
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+        return "I couldn't understand that. Please ask about booking, drivers, vehicle tracking, retrieval, pricing, or support."

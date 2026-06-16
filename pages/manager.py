@@ -21,13 +21,17 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-
+/* Global Canvas Background Adjustments */
+.stApp {
+    background-color: #F8F9FA !important; /* Soft Premium Off-White Canvas */
+    font-family: 'Inter', -apple-system, sans-serif !important;
+}
 
 .title{
 text-align:center;
 font-size:42px;
 font-weight:bold;
-color:#0B3D91;
+color:#1A365D; /* Corporate Deep Blue Accent */
 }
 
 
@@ -35,10 +39,21 @@ color:#0B3D91;
 background:white;
 padding:20px;
 border-radius:18px;
-box-shadow:0px 5px 15px #ddd;
+box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+border: 1px solid #E2E8F0;
+}
+
+/* Metric Layout Polish */
+div[data-testid="stMetricValue"] {
+    color: #1A365D !important;
+    font-weight: 800 !important;
 }
 
 /* --- ADDED THIS HERE TO KEEP THE SIDEBAR IN CAPITALS --- */
+section[data-testid="stSidebar"], section[data-testid="stSidebar"] * {
+    background-color: #212529 !important; /* High-Contrast Charcoal Dark Slate Sidebar */
+    color: #FFFFFF !important; /* Pure White text on dark sidebar options */
+}
 section[data-testid="stSidebar"] *, 
 [data-testid="stSidebarNavItems"] *,
 section[data-testid="stSidebar"] span,
@@ -262,6 +277,42 @@ else:
     st.info(
         "No vehicle activity yet"
     )
+
+
+# =====================================================================
+# LIVE DRIVER CAR COUNT ACTIVITY TABLE (ADDED HERE)
+# =====================================================================
+st.divider()
+st.subheader("📋 LIVE DRIVER WORKLOAD SUMMARY")
+
+if bookings:
+    # Calculate live active car tallies per assigned driver dynamically
+    driver_tallies = {}
+    for booking in bookings:
+        assigned_driver = booking[7]
+        current_status = booking[8]
+        
+        # Only count cars currently in active transit or parked states
+        if current_status not in ["Delivered Vehicle", "Vehicle Ready!"]:
+            driver_tallies[assigned_driver] = driver_tallies.get(assigned_driver, 0) + 1
+
+    # Format data table arrays for streamlined Streamlit display framework
+    table_records = []
+    for driver in drivers:
+        d_name = driver[1]
+        d_phone = driver[2]
+        active_count = driver_tallies.get(d_name, 0)
+        
+        table_records.append({
+            "Driver Name": d_name,
+            "Contact Number": d_phone,
+            "Active Assigned Cars": f"📦 {active_count} Vehicles"
+        })
+
+    # Render a responsive, clean tabular layout on screen
+    st.table(table_records)
+else:
+    st.info("No active workloads to display.")
 
 
 # =====================================================================

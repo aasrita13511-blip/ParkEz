@@ -13,26 +13,79 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.stApp{
-background:#F5F9FF;
+/* Global Canvas Background (Option 2 Muted Tone Setup) */
+.stApp {
+    background-color: #F8F9FA !important; 
+    font-family: 'Inter', -apple-system, sans-serif !important;
 }
 
 .big-title{
 text-align:center;
 font-size:65px;
 font-weight:bold;
-color:#0B3D91;
+color:#1A365D; /* Corporate Deep Blue Accent */
 }
 
 .tagline{
 text-align:center;
 font-size:25px;
-color:#555;
+color:#718096; /* Modern Slate Grey Muted Description Text */
 margin-bottom:40px;
 }
 
 .block-container{
 padding-top:2rem;
+}
+
+/* Modern Clean Styling overrides for Text Fields & Selection Boxes */
+.stTextInput input, .stSelectbox div[data-baseweb="select"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    color: #1A202C !important;
+    padding: 10px !important;
+}
+
+/* Option 2 Input Labels Typography */
+div[data-testid="stMarkdownContainer"] p {
+    font-weight: 600 !important;
+    color: #1A202C !important;
+}
+
+/* Blue and Red Navigation Tab Setup Layout */
+div[data-testid="stTabs"] button {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #718096 !important;
+}
+div[data-testid="stTabs"] button[aria-selected="true"] {
+    color: #DE2910 !important; /* Active indicator brand operational red */
+    border-bottom: 3px solid #DE2910 !important;
+}
+
+/* Primary High-Conversion Corporate Blue Button Layout */
+div.stButton > button {
+    background-color: #1A365D !important; /* Brand Corporate Deep Blue Canvas */
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    padding: 12px 24px !important;
+    border-radius: 30px !important; /* Premium rounded pill shape adjustments */
+    border: none !important;
+    width: 100% !important; 
+    box-shadow: 0 4px 6px -1px rgba(26, 54, 93, 0.1) !important;
+}
+div.stButton > button:hover {
+    background-color: #122542 !important; /* Darker navy shade applied on active hover */
+}
+
+/* High-Contrast Charcoal Sidebar Layout */
+section[data-testid="stSidebar"] {
+    background-color: #212529 !important; /* Dark Slate Charcoal Option 2 Sidebar */
+    border-right: none !important;
+}
+section[data-testid="stSidebar"] *, section[data-testid="stSidebar"] span {
+    color: #FFFFFF !important; /* Crisp white tab navigation elements over dark background */
 }
 
 /* --- NEW SIDEBAR CAPITALIZATION STYLING --- */
@@ -65,7 +118,7 @@ div.stActionButton {
 }
 .stActionButton button:hover {
     background-color: #e04040 !important;
-    transform: scale(1.05);
+    transform: scale(1.05) !important;
 }
 
 </style>
