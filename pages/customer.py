@@ -1,14 +1,6 @@
 import streamlit as st
 import random
-import time
-import pandas as pd
-from database import (
-    add_booking,
-    get_available_driver,
-    get_booking,
-    update_status,
-    get_customer_history_df
-)
+from database import add_booking, get_booking, update_status, get_customer_history_df
 from styles import apply_corporate_theme, render_brand_header
 
 st.set_page_config(
@@ -17,112 +9,101 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply global red & white enterprise styles instantly
 apply_corporate_theme()
 render_brand_header("Customer Interactive Valet Space")
 
-# --- CONSOLIDATED STABLE MULTI-TAB VIEW PORTS ---
-tab1, tab2, tab3 = st.tabs(
-    [
-        "🚗 REQUEST VALET", 
-        "🔑 LIVE STATUS TRACKER", 
-        "📊 MY PARKING HISTORY"
-    ]
-)
+tab1, tab2, tab3 = st.tabs(["🚗 REQUEST VALET", "🔑 LIVE STATUS TRACKER", "📊 MY PARKING HISTORY"])
 
 # ================= REQUEST VALET =================
 with tab1:
     st.subheader("Book Your Valet Driver")
-    
-    # Safely unpack saved customer profiles directly out of active sessions
     default_name = st.session_state.get("user_name", "")
     default_phone = st.session_state.get("user_phone", "")
 
-    name = st.text_input("Customer Name", value=default_name)
-    phone = st.text_input("Phone Number", value=default_phone)
-    car_model = st.text_input("Car Model")
-    vehicle_number = st.text_input("Vehicle Number")
-    arrival = st.time_input("Arrival Time")
+    name = st.text_input("Customer Name", value=default_name, key="c_name")
+    phone = st.text_input("Phone Number", value=default_phone, key="c_phone")
+    car_model = st.text_input("Car Model", key="c_car")
+    vehicle_number = st.text_input("Vehicle Number", key="c_num")
+    arrival = st.time_input("Arrival Time", key="c_time")
 
     if st.button("REQUEST DRIVER"):
         if name and phone and car_model and vehicle_number:
             ticket = "VAL" + str(random.randint(1000, 9999))
-            driver_data = get_available_driver()
-            
-            # Check query string results formats cleanly
-            driver = driver_data[0] if isinstance(driver_data, (list, tuple)) else driver_data
-
-            add_booking((
-                ticket, name, phone, car_model, vehicle_number, 
-                str(arrival), driver, "Driver Assigned", "Just Now"
-            ))
-
-            st.success("Valet Driver Assigned Successfully")
-            st.info(f"🎫 **Ticket ID :** {ticket}  \n👨‍✈️ **Assigned Driver :** {driver}  \n📌 **Status :** Driver Assigned")
+            add_booking((ticket, name, phone, car_model, vehicle_number, str(arrival), "Rahul", "Driver Assigned", "Just Now"))
+            st.success("Valet Request Sent Successfully!")
+            st.info(f"🎫 **Ticket ID:** {ticket} | Copy this code to track your car.")
         else:
             st.warning("Please fill all details")
 
-# ================= LIVE STATUS TRACKER (STABLE SWIGGY/ZOMATO MILESTONES) =================
+# ================= LIVE STATUS TRACKER (100% STABLE - NO LOOPS) =================
 with tab2:
-    st.subheader("Request Vehicle Retrieval")
-    ticket_id = st.text_input("Enter Ticket ID")
-    leave_time = st.selectbox("When are you leaving?", ["2 Minutes", "5 Minutes", "10 Minutes"])
+    st.subheader("Live Progress Tracking Dashboard")
+    search_ticket = st.text_input("Enter Ticket ID to look up status", key="track_t_id")
 
-    if st.button("BRING MY CAR"):
-        booking = get_booking(ticket_id)
+    if search_ticket:
+        booking = get_booking(search_ticket)
         if booking:
-            update_status(ticket_id, "Vehicle Returning")
-            st.success("Driver has been notified successfully!")
+            if st.button("🚨 REQUEST VEHICLE RETRIEVAL"):
+                update_status(search_ticket, "Vehicle Returning")
+                st.toast("Retrieval request broadcasted to drivers!")
+                st.rerun()
+
             st.divider()
-
-            st.subheader("🛰️ LIVE DISPATCH TRACKING PROGRESS")
             
-            # Use isolated single-render element controls to safely bypass loop thread blocks
-            status_box = st.empty()
-            progress_bar = st.progress(0)
-
-            steps = [
-                "Driver Assigned 🚘",
-                "Driver Going To Parking Area 📍",
-                "Vehicle Located 🔎",
-                "Vehicle Moving 🚗",
-                "Arriving At Pickup Point ✅"
-            ]
-
-            # Loop updates text states cleanly without overloading browser engine canvases
-            for idx, step in enumerate(steps):
-                status_box.info(f"**Current Status:** {step}")
-                progress_bar.progress((idx + 1) / len(steps))
-                time.sleep(1)
-
-            disp_driver = booking[7] if len(booking) > 7 else "Your Assigned Valet"
-            st.success(f"🎉 **Your vehicle is ready at the pickup point!**  \n⏱️ **ETA :** {leave_time}  \n👨‍✈️ **Driver :** {disp_driver}")
+            # Read status statically out of database row
+            current_status = booking[8] if len(booking) > 8 else "Driver Assigned"
+            driver_name = booking[7] if len(booking) > 7 else "Assigned Driver"
+            
+            st.markdown(f"### 👨‍✈️ Driver Assigned: {driver_name}")
+            
+            # --- STATIC TIMELINE MILESTONES ---
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                if current_status == "Driver Assigned":
+                    st.markdown("<div style='background:#EFF6FF; border-left:5px solid #1E3A8A; padding:15px; border-radius:8px;'><b>🔵 STEP 1/4</b><br>Driver Confirmed</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Driver Confirmed</div>", unsafe_allow_html=True)
+                    
+            with col2:
+                if current_status == "Picked Up":
+                    st.markdown("<div style='background:#FEF3C7; border-left:5px solid #D97706; padding:15px; border-radius:8px;'><b>🟠 STEP 2/4</b><br>Vehicle Picked Up</div>", unsafe_allow_html=True)
+                elif current_status in ["Parked Vehicle", "Vehicle Returning", "Delivered Vehicle"]:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Vehicle Picked Up</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 2: Pickup Pending</div>", unsafe_allow_html=True)
+                    
+            with col3:
+                if current_status == "Parked Vehicle":
+                    st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>🟢 STEP 3/4</b><br>Secured in Lot</div>", unsafe_allow_html=True)
+                elif current_status in ["Vehicle Returning", "Delivered Vehicle"]:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Secured in Lot</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 3: Lot Transit</div>", unsafe_allow_html=True)
+                    
+            with col4:
+                if current_status == "Vehicle Returning":
+                    st.markdown("<div style='background:#FEE2E2; border-left:5px solid #DC2626; padding:15px; border-radius:8px;'><b>🔴 STEP 4/4</b><br>Vehicle Returning!</div>", unsafe_allow_html=True)
+                elif current_status == "Delivered Vehicle":
+                    st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>✅ COMPLETE</b><br>Car Delivered!</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 4: Ready at Terminal</div>", unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.success(f"Current System State: The vehicle status is currently **'{current_status}'**.")
         else:
-            st.error("Invalid Ticket ID. Could not boot operational progress matrix.")
+            st.error("Ticket ID not found.")
 
-# ================= MY PARKING HISTORY (PANDAS DATA GRID) =================
+# ================= MY PARKING HISTORY =================
 with tab3:
     st.subheader("Your Completed Bookings")
     user_phone = st.session_state.get("user_phone", "")
-    
     if user_phone:
         try:
             history_df = get_customer_history_df(user_phone)
             if not history_df.empty:
-                # Render clean structural tabular sorting grids natively using Pandas
                 st.dataframe(history_df, use_container_width=True, hide_index=True)
-                
-                # Single action click data exporter report downloader setup
-                csv_file = history_df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Download My History (CSV)",
-                    data=csv_file,
-                    file_name=f"parkez_history_{user_phone}.csv",
-                    mime="text/csv"
-                )
             else:
-                st.info("No booking records found matching your active phone number profile.")
+                st.info("No records found.")
         except Exception as e:
-            st.error(f"Error compiling user dashboard reporting structures: {e}")
-    else:
-        st.warning("Please log in from the main portal authentication homepage first to trace your history profiles.")
+            st.error(f"Error: {e}")

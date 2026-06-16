@@ -11,18 +11,17 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply global red & white enterprise styles instantly
 apply_corporate_theme()
 render_brand_header("Smart Valet Logistics — Skip the Wait, Enjoy the Ride")
 
-# --- FLOATING AI CHATBOT SUPPORT BUTTON HTML/CSS ---
+# --- FLOATING CHATBOT BUTTON ---
 st.markdown("""
     <style>
     .floating-support-btn {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background-color: #DC2626; /* Dynamic Operational Red */
+        background-color: #DC2626;
         color: white !important;
         padding: 15px 25px;
         border-radius: 50px;
@@ -37,7 +36,7 @@ st.markdown("""
     }
     .floating-support-btn:hover {
         transform: translateY(-3px);
-        background-color: #B91C1C; /* Hover Dark Red */
+        background-color: #B91C1C;
     }
     </style>
     
@@ -46,130 +45,53 @@ st.markdown("""
     </a>
 """, unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(
-    [
-        "🔐 LOGIN",
-        "📝 SIGN UP"
-    ]
-)
+tab1, tab2 = st.tabs(["🔐 LOGIN", "📝 SIGN UP"])
 
 # ---------------- LOGIN ----------------
-
 with tab1:
-
-    role = st.selectbox(
-        "Login As",
-        [
-            "Customer",
-            "Driver",
-            "Manager"
-        ]
-    )
-
-    phone = st.text_input(
-        "Enter Phone Number"
-    )
-
-    password = st.text_input(
-        "Enter Password",
-        type="password"
-    )
+    role = st.selectbox("Login As", ["Customer", "Driver", "Manager"])
+    phone = st.text_input("Enter Phone Number", key="login_phone")
+    password = st.text_input("Enter Password", type="password", key="login_pass")
 
     if st.button("LOGIN"):
-
         if role == "Customer":
-
-            user = customer_login(
-                phone,
-                password
-            )
-
+            user = customer_login(phone, password)
             if user:
-                # Store user properties safely inside session memory arrays
                 st.session_state["user_phone"] = phone
-                st.session_state["user_name"] = user[1] if isinstance(user, (list, tuple)) else user
+                st.session_state["user_name"] = user[0] if isinstance(user, (list, tuple)) else user
                 st.session_state["role"] = "Customer"
-
-                st.toast(f"🔒 Authenticated as Customer: {st.session_state['user_name']}")
-                st.success(f"Welcome {st.session_state['user_name']}!")
+                st.success("Welcome!")
                 st.switch_page("pages/customer.py")
-
             else:
-                st.error(
-                    "Invalid Credentials"
-                )
-
+                st.error("Invalid Credentials")
         elif role == "Driver":
-
-            if (
-                phone == "8888888888"
-                and password == "1234"
-            ):
+            if phone == "8888888888" and password == "1234":
                 st.session_state["user_phone"] = phone
                 st.session_state["role"] = "Driver"
-
-                st.toast("👨‍✈️ Driver Authentication Approved. Opening active dispatch boards...")
                 st.switch_page("pages/driver.py")
-
             else:
-                st.error(
-                    "Invalid Credentials"
-                )
-
+                st.error("Invalid Credentials")
         elif role == "Manager":
-
-            if (
-                phone == "7777777777"
-                and password == "1234"
-            ):
+            if phone == "7777777777" and password == "1234":
                 st.session_state["user_phone"] = phone
                 st.session_state["role"] = "Manager"
-
-                st.toast("📊 Manager Access Token Approved. Booting operational matrix charts...")
                 st.switch_page("pages/manager.py")
-
             else:
-                st.error(
-                    "Invalid Credentials"
-                )
+                st.error("Invalid Credentials")
 
 # ---------------- SIGNUP ----------------
-
 with tab2:
-
-    st.subheader(
-        "Create Customer Account"
-    )
-
-    name = st.text_input(
-        "Full Name"
-    )
-
-    phone_signup = st.text_input(
-        "Phone Number "
-    )
-
-    password_signup = st.text_input(
-        "Password ",
-        type="password"
-    )
+    st.subheader("Create Customer Account")
+    name = st.text_input("Full Name", key="signup_name")
+    phone_signup = st.text_input("Phone Number ", key="signup_phone")
+    password_signup = st.text_input("Password ", type="password", key="signup_pass")
 
     if st.button("SIGN UP"):
-
-        success = register_customer(
-            name,
-            phone_signup,
-            password_signup
-        )
-
-        if success:
-            # Interactive visual celebration popup on account registration completion
-            st.balloons()
-            st.success(
-                "Account Created Successfully! Switch over to the LOGIN tab to access your panel."
-            )
-
+        if name and phone_signup and password_signup:
+            success = register_customer(name, phone_signup, password_signup)
+            if success:
+                st.success("Account Created Successfully! Go to LOGIN tab.")
+            else:
+                st.error("Phone Number Already Exists")
         else:
-            st.error(
-                "Phone Number Already Exists"
-            )
+            st.warning("Please fill all fields")
