@@ -37,61 +37,54 @@ color:#1A365D;
 
 
 .benefit-card{
-
-background:#EEEEEE;
-
-border-radius:12px;
-
-padding:24px;
-
-min-height:160px;
-
+    background:#EEEEEE;
+    border-radius:12px;
+    padding:24px;
+    min-height:160px;
 }
 
 
 .benefit-card h3{
-
-color:#1A202C;
-
-font-size:20px;
-
+    color:#1A202C;
+    font-size:20px;
 }
 
 
 .benefit-card p{
-
-color:#718096;
-
+    color:#718096;
 }
 
 
 div.stButton > button{
-
-background:#1A365D !important;
-
-color:white !important;
-
-border-radius:30px !important;
-
-font-weight:bold !important;
-
-width:100% !important;
-
+    background:#1A365D !important;
+    color:white !important;
+    border-radius:30px !important;
+    font-weight:bold !important;
+    width:100% !important;
 }
 
 
 
 section[data-testid="stSidebar"]{
-
-background:#212529 !important;
-
+    background:#212529 !important;
 }
 
-
-section[data-testid="stSidebar"] *{
-
-color:white !important;
-
+/* 
+   PERMANENT VISIBILITY & CAPITALIZATION FIX:
+   Forces all sidebar items into uppercase letters and overrides Streamlit's
+   default dark font color to a clear, high-contrast crisp white.
+*/
+section[data-testid="stSidebar"] *, 
+section[data-testid="stSidebar"] span, 
+section[data-testid="stSidebarNavItems"] span,
+[data-testid="stSidebarNav"] a,
+[data-testid="stSidebarNav"] span,
+.st-emotion-cache-16ids9d,
+.st-emotion-cache-6q9w0q {
+    color: #FFFFFF !important; 
+    text-transform: uppercase !important; /* Forces all bar letters to be CAPITALS */
+    letter-spacing: 1.2px !important;
+    font-weight: 700 !important;
 }
 
 </style>
@@ -303,7 +296,7 @@ Vehicle Ready!
 
 ETA : {leave_time}
 
-Driver : {booking[7]}
+Driver : {booking}
 """
 )
 
@@ -366,41 +359,8 @@ unsafe_allow_html=True
     "Details",
     key="spot"
     ):
-
-
-        st.info(
-"""
-🚗 BOOK SPOT
-
-
-Reserve your parking before arrival.
-
-
-How it works:
-
-1. Enter customer details
-
-2. Add vehicle details
-
-3. Select arrival time
-
-4. Request valet driver
-
-5. Receive Ticket ID
-
-
-Benefits:
-
-✓ No waiting queues
-
-✓ Quick valet assignment
-
-✓ Live tracking
-
-✓ Easy retrieval
-
-"""
-)
+        # Clean transition directly routing user to dedicated feature script
+        st.switch_page("pages/book_spot_details.py")
 
 
 
@@ -434,44 +394,8 @@ unsafe_allow_html=True
     "Details",
     key="pass"
     ):
-
-
-        st.info(
-"""
-📅 MONTHLY PASS
-
-
-Enjoy easier parking with ParkEz.
-
-
-How it works:
-
-1. Register for a monthly plan
-
-2. Select parking location
-
-3. Activate your pass
-
-
-Benefits:
-
-✓ Fixed monthly rates
-
-✓ Faster parking access
-
-✓ No repeated booking
-
-✓ Convenient for regular users
-
-
-Perfect for:
-
-• Office employees
-
-• Frequent visitors
-
-"""
-)
+        # Clean transition directly routing user to dedicated feature script
+        st.switch_page("pages/monthly_pass_details.py")
 
 
 
@@ -505,42 +429,8 @@ unsafe_allow_html=True
     "Details",
     key="ev"
     ):
-
-
-        st.info(
-"""
-⚡ EV CHARGING
-
-
-Charge your electric vehicle with ParkEz.
-
-
-How it works:
-
-1. Select EV parking location
-
-2. Park your vehicle
-
-3. Connect charging station
-
-4. Monitor charging status
-
-
-Features:
-
-✓ EV support
-
-✓ Secure parking
-
-✓ Charging while parked
-
-✓ Saves time
-
-
-Availability depends on venue.
-
-"""
-)
+        # Clean transition directly routing user to dedicated feature script
+        st.switch_page("pages/ev_charging_details.py")
 
 
 
