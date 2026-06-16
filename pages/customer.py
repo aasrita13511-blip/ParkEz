@@ -1,16 +1,20 @@
 import streamlit as st
 import random
 import pandas as pd
-import folium
-from streamlit_folium import st_folium
 from database import add_booking, get_booking, update_status, get_customer_history_df
 from styles import apply_corporate_theme, render_brand_header
 
-st.set_page_config(page_title="Customer App Interface", page_icon="🚗", layout="wide")
+st.set_page_config(
+    page_title="Customer App Interface", 
+    page_icon="🚗", 
+    layout="wide"
+)
+
+# Apply global red & white styles
 apply_corporate_theme()
 render_brand_header("Customer Interactive Valet Space")
 
-tab1, tab2, tab3 = st.tabs(["🚗 REQUEST VALET", "🔑 LIVE RADAR TRACKER", "📊 MY PARKING HISTORY"])
+tab1, tab2, tab3 = st.tabs(["🚗 REQUEST VALET", "🔑 LIVE TELEMETRY TRACKER", "📊 MY PARKING HISTORY"])
 
 # ================= REQUEST VALET =================
 with tab1:
@@ -33,10 +37,10 @@ with tab1:
         else:
             st.warning("Please input all configuration fields.")
 
-# ================= RETRIEVE & TRACK VEHICLE (STABLE FOLIUM ENGINE) =================
+# ================= RETRIEVE & TRACK VEHICLE (SWIGGY / ZOMATO MULTI-MILESTONE TRACKER) =================
 with tab2:
-    st.subheader("Interactive Tracking Matrix")
-    search_ticket = st.text_input("Enter Ticket ID to boot live tracking system")
+    st.subheader("Live Telemetry Radar Tracker")
+    search_ticket = st.text_input("Enter Ticket ID to start live tracker")
 
     if search_ticket:
         booking = get_booking(search_ticket)
@@ -47,7 +51,7 @@ with tab2:
 
             st.divider()
             
-            # --- SAFE WEB REFRESH SUBCOMPONENT FRAGMENT (No looping crash) ---
+            # --- SAFE WEB REFRESH SUBCOMPONENT FRAGMENT (No looping crashes) ---
             @st.fragment(run_every=4.0)
             def run_radar_telemetry(t_id):
                 live_data = get_booking(t_id)
@@ -57,37 +61,54 @@ with tab2:
                     lon = live_data[11] if live_data[11] is not None else 78.390
                     driver_name = live_data[7] if live_data[7] is not None else "Assigned Driver"
                     
-                    st.info(f"🛰️ **Live Operational Status:** {current_status} | **Driver En Route:** {driver_name}")
+                    # --- SWIGGY/ZOMATO STYLE STEP PROGRESS INDICATOR CARD ---
+                    st.markdown(f"### 🛵 Live Driver Dispatch: {driver_name}")
+                    st.write(f"📍 **Current Telemetry Beacon:** Lat `{lat:.4f}`, Lon `{lon:.4f}`")
                     
-                    m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True)
+                    # Modern step indicator matrix cards
+                    col1, col2, col3, col4 = st.columns(4)
                     
-                    folium.Marker(
-                        [lat, lon],
-                        popup=f"<b>Your Valet Driver ({driver_name})</b><br>Status: {current_status}",
-                        tooltip="Click to view driver information",
-                        icon=folium.Icon(color='red', icon='car', prefix='fa')
-                    ).add_to(m)
+                    with col1:
+                        if current_status == "Driver Assigned":
+                            st.markdown("<div style='background:#EFF6FF; border-left:5px solid #1E3A8A; padding:15px; border-radius:8px;'><b>🔵 STEP 1/4</b><br>Driver Dispatched</div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Driver Dispatched</div>", unsafe_allow_html=True)
+                            
+                    with col2:
+                        if current_status == "Picked Up":
+                            st.markdown("<div style='background:#FEF3C7; border-left:5px solid #D97706; padding:15px; border-radius:8px;'><b>🟠 STEP 2/4</b><br>Vehicle Picked Up</div>", unsafe_allow_html=True)
+                        elif current_status in ["Parked Vehicle", "Vehicle Returning", "Delivered Vehicle"]:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Vehicle Picked Up</div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 2: Pickup Pending</div>", unsafe_allow_html=True)
+                            
+                    with col3:
+                        if current_status == "Parked Vehicle":
+                            st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>🟢 STEP 3/4</b><br>Secured in Lot</div>", unsafe_allow_html=True)
+                        elif current_status in ["Vehicle Returning", "Delivered Vehicle"]:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Secured in Lot</div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 3: Lot Transit</div>", unsafe_allow_html=True)
+                            
+                    with col4:
+                        if current_status == "Vehicle Returning":
+                            st.markdown("<div style='background:#FEE2E2; border-left:5px solid #DC2626; padding:15px; border-radius:8px;'><b>🔴 STEP 4/4</b><br>Vehicle Returning!</div>", unsafe_allow_html=True)
+                        elif current_status == "Delivered Vehicle":
+                            st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>✅ COMPLETE</b><br>Car Delivered!</div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 4: Retrieval Ready</div>", unsafe_allow_html=True)
                     
-                    folium.Marker(
-                        [17.5490, 78.3950],
-                        popup="<b>ParkEz Drop-off/Pickup Hub</b>",
-                        icon=folium.Icon(color='blue', icon='flag')
-                    ).add_to(m)
+                    st.markdown("<br>", unsafe_allow_html=True)
                     
-                    folium.PolyLine(
-                        locations=[[lat, lon], [17.5490, 78.3950]],
-                        color="#DC2626",
-                        weight=4,
-                        opacity=0.7
-                    ).add_to(m)
-                    
-                    st_folium(m, width="100%", height=500, key=f"map_{lat}_{lon}")
+                    # Stable corporate roads map grid without memory loops crashing your frame
+                    map_df = pd.DataFrame({'lat': [lat], 'lon': [lon]})
+                    st.map(map_df, zoom=15)
                 else:
                     st.error("Telemetry link lost.")
 
             run_radar_telemetry(search_ticket)
         else:
-            st.error("Ticket hash index not detected inside database records.")
+            st.error("Ticket ID not found inside database records.")
 
 # ================= MY PARKING HISTORY =================
 with tab3:
