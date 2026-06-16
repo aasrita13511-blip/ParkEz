@@ -1,3 +1,8 @@
+import sqlite3
+
+conn = sqlite3.connect('parkez.db')
+cursor = conn.cursor()
+
 def update_status(ticket, status, updated_time):
     # Example SQL modification context:
     cursor.execute(
