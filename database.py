@@ -1,511 +1,199 @@
 import sqlite3
 
-
 DB_NAME = "valet.db"
 
 
-
-# Connect database
 def connect():
-
     return sqlite3.connect(DB_NAME)
 
 
-
-
-# Create tables
 def create_tables():
 
     conn = connect()
 
     cur = conn.cursor()
 
-
-
-    # Customer bookings table
-
     cur.execute("""
     CREATE TABLE IF NOT EXISTS bookings(
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         ticket TEXT,
-
         customer TEXT,
-
         phone TEXT,
-
         car_name TEXT,
-
         car_number TEXT,
-
         arrival_time TEXT,
-
         driver TEXT,
-
-        status TEXT,
-
-        retrieve_time TEXT
-
+        status TEXT
     )
     """)
-
-
-
-    # Drivers table
 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS drivers(
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         name TEXT,
-
         phone TEXT,
-
         available TEXT
-
     )
     """)
 
-
-
-    # Add default drivers
-
     drivers = [
-
-        ("Rahul","9876543210","Yes"),
-
-        ("Arjun","9876543211","Yes"),
-
-        ("Vikram","9876543212","Yes")
-
+        ("Rahul", "9876543210", "Yes"),
+        ("Arjun", "9876543211", "Yes"),
+        ("Vikram", "9876543212", "Yes")
     ]
-
-
 
     for driver in drivers:
 
         cur.execute(
-        """
-        INSERT OR IGNORE INTO drivers
-        (name,phone,available)
-
-        VALUES (?,?,?)
-
-        """,
-
-        driver
-
+            """
+            INSERT OR IGNORE INTO drivers
+            (name,phone,available)
+            VALUES (?,?,?)
+            """,
+            driver
         )
 
-
-
     conn.commit()
-
     conn.close()
 
-
-
-
-
-
-
-# Add new valet booking
-
-def add_booking(data):
-
-
-    conn = connect()
-
-    cur = conn.cursor()
-
-
-
-    cur.execute(
-    """
-
-    INSERT INTO bookings
-
-    (
-    ticket,
-    customer,
-    phone,
-    car_name,
-    car_number,
-    arrival_time,
-    driver,
-    status,
-    retrieve_time
-    )
-
-
-    VALUES (?,?,?,?,?,?,?,?,?)
-
-    """,
-
-    data
-
-    )
-
-
-
-    conn.commit()
-
-    conn.close()
-
-
-
-
-
-
-
-
-
-# Find available driver
 
 def get_driver():
 
-
     conn = connect()
 
     cur = conn.cursor()
 
-
-
     cur.execute(
-
-    """
-
-    SELECT name
-
-    FROM drivers
-
-    WHERE available='Yes'
-
-    LIMIT 1
-
-    """
-
+        """
+        SELECT name
+        FROM drivers
+        LIMIT 1
+        """
     )
-
-
-    driver = cur.fetchone()
-
-
-    conn.close()
-
-
-
-    if driver:
-
-        return driver[0]
-
-
-    return "No Driver Available"
-
-
-
-
-
-
-
-
-
-# Get booking using ticket
-
-def get_booking(ticket):
-
-
-    conn = connect()
-
-    cur = conn.cursor()
-
-
-
-    cur.execute(
-
-    """
-
-    SELECT *
-
-    FROM bookings
-
-    WHERE ticket=?
-
-    """,
-
-    (ticket,)
-
-    )
-
-
 
     data = cur.fetchone()
 
-
     conn.close()
 
-
-    return data
-
+    return data[0] if data else "No Driver"
 
 
-
-
-
-
-# Update vehicle status
-
-def update_status(ticket,status):
-
+def add_booking(data):
 
     conn = connect()
 
-    cur = conn.cursor()
+    conn.execute(
+        """
+        INSERT INTO bookings
+        (ticket,customer,phone,car_name,
+        car_number,arrival_time,driver,status)
 
-
-
-    cur.execute(
-
-    """
-
-    UPDATE bookings
-
-    SET status=?
-
-    WHERE ticket=?
-
-    """,
-
-    (status,ticket)
-
+        VALUES (?,?,?,?,?,?,?,?)
+        """,
+        data
     )
-
-
 
     conn.commit()
 
     conn.close()
 
 
-
-
-
-
-
-
-
-# Get all bookings
-
-def all_bookings():
-
+def get_booking(ticket):
 
     conn = connect()
 
-
-    cur = conn.cursor()
-
-
-    cur.execute(
-
-    """
-
-    SELECT *
-
-    FROM bookings
-
-    """
-
-    )
-
-
-    data = cur.fetchall()
-
-
+    data = conn.execute(
+        """
+        SELECT *
+        FROM bookings
+        WHERE ticket=?
+        """,
+        (ticket,)
+    ).fetchone()
 
     conn.close()
-
-
 
     return data
 
 
+def update_status(ticket,status):
+
+    conn = connect()
+
+    conn.execute(
+        """
+        UPDATE bookings
+        SET status=?
+        WHERE ticket=?
+        """,
+        (status,ticket)
+    )
+
+    conn.commit()
+
+    conn.close()
 
 
+def all_bookings():
 
+    conn = connect()
 
+    data = conn.execute(
+        """
+        SELECT *
+        FROM bookings
+        """
+    ).fetchall()
 
+    conn.close()
 
+    return data
 
-# Manager Dashboard Functions
-
-
-
-# Total cars handled
 
 def total_cars():
 
-
     conn = connect()
 
-
-    result = conn.execute(
-
-    """
-
-    SELECT COUNT(*)
-
-    FROM bookings
-
-    """
-
-    ).fetchone()
-
-
+    count = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM bookings
+        """
+    ).fetchone()[0]
 
     conn.close()
 
+    return count
 
-
-    return result[0]
-
-
-
-
-
-
-
-
-
-
-
-# Cars delivered/retrieved
 
 def cars_retrieved():
 
-
     conn = connect()
 
-
-
-    result = conn.execute(
-
-    """
-
-    SELECT COUNT(*)
-
-    FROM bookings
-
-    WHERE status='Delivered'
-
-    """
-
-    ).fetchone()
-
-
+    count = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM bookings
+        WHERE status='Delivered'
+        """
+    ).fetchone()[0]
 
     conn.close()
 
+    return count
 
-
-    return result[0]
-
-
-
-
-
-
-
-
-
-
-
-# Active drivers
 
 def active_drivers():
 
-
     conn = connect()
 
-
-
-    result = conn.execute(
-
-    """
-
-    SELECT name,phone
-
-    FROM drivers
-
-    WHERE available='Yes'
-
-    """
-
+    data = conn.execute(
+        """
+        SELECT name,phone
+        FROM drivers
+        """
     ).fetchall()
 
-
-
     conn.close()
 
-
-
-    return result
-
-
-
-
-
-
-
-
-
-
-
-# Average waiting time
-
-def average_wait():
-
-
-    conn = connect()
-
-
-
-    result = conn.execute(
-
-    """
-
-    SELECT AVG(
-
-    (julianday(retrieve_time)
-
-    -
-
-    julianday(arrival_time))
-
-    *24*60
-
-    )
-
-
-    FROM bookings
-
-
-    WHERE retrieve_time!=''
-
-    """
-
-    ).fetchone()
-
-
-
-    conn.close()
-
-
-
-    if result[0]:
-
-        return round(result[0],2)
-
-
-    return 5
+    return data
