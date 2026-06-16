@@ -1,8 +1,6 @@
 import streamlit as st
 import random
-import time
 import pandas as pd
-
 from database import (
     add_booking,
     get_available_driver,
@@ -18,7 +16,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply red and white corporate styles
 apply_corporate_theme()
 render_brand_header("Customer Operations Panel")
 
@@ -30,10 +27,9 @@ tab1, tab2, tab3 = st.tabs(
     ]
 )
 
-# ================= BOOK VALET =================
+# ================= REQUEST VALET =================
 with tab1:
     st.subheader("Book Your Valet Driver")
-    
     default_name = st.session_state.get("user_name", "")
     default_phone = st.session_state.get("user_phone", "")
 
@@ -58,63 +54,54 @@ with tab1:
         else:
             st.warning("Please fill all details")
 
-# ================= RETRIEVE VEHICLE =================
+# ================= RETRIEVE & TRACK VEHICLE (STABLE MAP FRAGMENT) =================
 with tab2:
     st.subheader("Request Vehicle Retrieval")
-    ticket = st.text_input("Enter Ticket ID")
-    leave_time = st.selectbox("When are you leaving?", ["2 Minutes", "5 Minutes", "10 Minutes"])
+    search_ticket = st.text_input("Enter Ticket ID to Track")
 
-    if st.button("BRING MY CAR"):
-        booking = get_booking(ticket)
+    if search_ticket:
+        booking = get_booking(search_ticket)
         if booking:
-            update_status(ticket, "Vehicle Returning")
-            st.success("Driver has been notified!")
+            if st.button("🚨 REQUEST VEHICLE RETRIEVAL"):
+                update_status(search_ticket, "Vehicle Returning")
+                st.success("Driver has been notified!")
+
             st.divider()
+            st.subheader("📍 LIVE DRIVER LOCATOR MAP")
 
-            st.subheader("📍 LIVE DRIVER PROGRESS")
-            
-            # --- STABLE TRACKING INTERFACE (Fixes the loop crash error) ---
-            status_box = st.empty()
-            progress_bar = st.progress(0)
+            # --- CRITICAL: Safe auto-refresh component container block ---
+            @st.fragment(run_every=4.0)
+            def render_live_tracker(t_id):
+                live_data = get_booking(t_id)
+                if live_data:
+                    # Map structural variables accurately matching index configurations
+                    current_status = live_data[8]
+                    lat = live_data[10] if live_data[10] is not None else 17.545
+                    lon = live_data[11] if live_data[11] is not None else 78.390
 
-            steps = [
-                "Driver Assigned 🚘",
-                "Driver Going To Parking Area 📍",
-                "Vehicle Located 🔎",
-                "Vehicle Moving 🚗",
-                "Arriving At Pickup Point ✅"
-            ]
+                    st.info(f"**Current Vehicle Status:** {current_status} | **Last Updated:** {live_data[9]}")
+                    
+                    # Package metrics array directly to map framework data grids
+                    map_df = pd.DataFrame({'lat': [lat], 'lon': [lon]})
+                    st.map(map_df, zoom=15)
+                else:
+                    st.error("Tracking signal disconnected.")
 
-            for idx, step in enumerate(steps):
-                status_box.info(f"**Current Status:** {step}")
-                progress_bar.progress((idx + 1) / len(steps))
-                time.sleep(1)
-
-            disp_driver = booking[7] if isinstance(booking, (list, tuple)) and len(booking) > 7 else "Assigned Valet"
-            st.success(f"🎉 Your vehicle is ready at the pickup point!  \n⏱️ ETA: {leave_time}  \n👨‍✈️ Driver: {disp_driver}")
+            # Fire execution sequence safely inline
+            render_live_tracker(search_ticket)
         else:
-            st.error("Invalid Ticket ID")
+            st.error("Ticket ID not found in system.")
 
-# ================= MY PARKING HISTORY =================
+# ================= PARKING HISTORY =================
 with tab3:
     st.subheader("Your Completed Bookings")
     user_phone = st.session_state.get("user_phone", "")
-    
     if user_phone:
         try:
             history_df = get_customer_history_df(user_phone)
             if not history_df.empty:
                 st.dataframe(history_df, use_container_width=True, hide_index=True)
-                csv_file = history_df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Download My History (CSV)",
-                    data=csv_file,
-                    file_name=f"parkez_history_{user_phone}.csv",
-                    mime="text/csv"
-                )
             else:
-                st.info("No booking records found for your phone number.")
+                st.info("No records found.")
         except Exception as e:
-            st.error(f"Error loading dashboard: {e}")
-    else:
-        st.warning("Please log in from the main portal homepage first.")
+            st.error(f"Error: {e}")
