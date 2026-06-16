@@ -18,7 +18,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply global styling assets
+# Apply red and white corporate styles
 apply_corporate_theme()
 render_brand_header("Customer Operations Panel")
 
@@ -73,7 +73,7 @@ with tab2:
 
             st.subheader("📍 LIVE DRIVER PROGRESS")
             
-            # --- STABLE SIMULATION BLOCK (Fixes the React 185 loop crash) ---
+            # --- STABLE TRACKING INTERFACE (Fixes the loop crash error) ---
             status_box = st.empty()
             progress_bar = st.progress(0)
 
