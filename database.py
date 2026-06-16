@@ -1,17 +1,42 @@
 import sqlite3
+import pandas as pd  # <--- NEW: Integrated Pandas Library
+from datetime import datetime
 
-DB_NAME = "valet.db"
+DB_NAME = "parkez.db"
 
 
 def connect():
-    return sqlite3.connect(DB_NAME)
+    return sqlite3.connect(DB_NAME, check_same_thread=False)
 
 
 def create_tables():
 
     conn = connect()
-
     cur = conn.cursor()
+
+    # Customers
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS customers(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        phone TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    # Drivers
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS drivers(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        phone TEXT,
+        status TEXT
+    )
+    """)
+
+    # Bookings
 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS bookings(
@@ -19,64 +44,108 @@ def create_tables():
         ticket TEXT,
         customer TEXT,
         phone TEXT,
-        car_name TEXT,
-        car_number TEXT,
+        car_model TEXT,
+        vehicle_number TEXT,
         arrival_time TEXT,
         driver TEXT,
-        status TEXT
+        status TEXT,
+        updated_time TEXT
     )
     """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS drivers(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        phone TEXT,
-        available TEXT
-    )
-    """)
+    # Insert demo drivers
 
-    drivers = [
-        ("Rahul", "9876543210", "Yes"),
-        ("Arjun", "9876543211", "Yes"),
-        ("Vikram", "9876543212", "Yes")
-    ]
+    cur.execute("SELECT COUNT(*) FROM drivers")
 
-    for driver in drivers:
+    if cur.fetchone()[0] == 0:
 
-        cur.execute(
+        drivers = [
+            ("Rahul", "9876543210", "Available"),
+            ("Arjun", "9876543211", "Available"),
+            ("Vikram", "9876543212", "Available")
+        ]
+
+        cur.executemany(
             """
-            INSERT OR IGNORE INTO drivers
-            (name,phone,available)
-            VALUES (?,?,?)
+            INSERT INTO drivers(name,phone,status)
+            VALUES(?,?,?)
             """,
-            driver
+            drivers
         )
 
     conn.commit()
     conn.close()
 
 
-def get_driver():
+# ---------------- CUSTOMER ----------------
+
+def register_customer(name, phone, password):
 
     conn = connect()
 
-    cur = conn.cursor()
+    try:
 
-    cur.execute(
+        conn.execute(
+            """
+            INSERT INTO customers(name,phone,password)
+            VALUES(?,?,?)
+            """,
+            (name, phone, password)
+        )
+
+        conn.commit()
+        return True
+
+    except:
+
+        return False
+
+    finally:
+
+        conn.close()
+
+
+def customer_login(phone, password):
+
+    conn = connect()
+
+    data = conn.execute(
+        """
+        SELECT *
+        FROM customers
+        WHERE phone=? AND password=?
+        """,
+        (phone, password)
+    ).fetchone()
+
+    conn.close()
+
+    return data
+
+
+# ---------------- DRIVER ----------------
+
+def get_available_driver():
+
+    conn = connect()
+
+    driver = conn.execute(
         """
         SELECT name
         FROM drivers
         LIMIT 1
         """
-    )
-
-    data = cur.fetchone()
+    ).fetchone()
 
     conn.close()
 
-    return data[0] if data else "No Driver"
+    if driver:
+        return driver[0]
 
+    return "Driver"
+
+
+# ---------------- BOOKINGS ----------------
 
 def add_booking(data):
 
@@ -84,17 +153,23 @@ def add_booking(data):
 
     conn.execute(
         """
-        INSERT INTO bookings
-        (ticket,customer,phone,car_name,
-        car_number,arrival_time,driver,status)
-
-        VALUES (?,?,?,?,?,?,?,?)
+        INSERT INTO bookings(
+        ticket,
+        customer,
+        phone,
+        car_model,
+        vehicle_number,
+        arrival_time,
+        driver,
+        status,
+        updated_time
+        )
+        VALUES(?,?,?,?,?,?,?,?,?)
         """,
         data
     )
 
     conn.commit()
-
     conn.close()
 
 
@@ -102,7 +177,7 @@ def get_booking(ticket):
 
     conn = connect()
 
-    data = conn.execute(
+    booking = conn.execute(
         """
         SELECT *
         FROM bookings
@@ -113,28 +188,34 @@ def get_booking(ticket):
 
     conn.close()
 
-    return data
+    return booking
 
 
-def update_status(ticket,status):
+def update_status(ticket, status):
 
     conn = connect()
+
+    now = datetime.now().strftime("%I:%M %p")
 
     conn.execute(
         """
         UPDATE bookings
-        SET status=?
+        SET status=?,
+        updated_time=?
         WHERE ticket=?
         """,
-        (status,ticket)
+        (
+            status,
+            now,
+            ticket
+        )
     )
 
     conn.commit()
-
     conn.close()
 
 
-def all_bookings():
+def get_all_bookings():
 
     conn = connect()
 
@@ -142,6 +223,7 @@ def all_bookings():
         """
         SELECT *
         FROM bookings
+        ORDER BY id DESC
         """
     ).fetchall()
 
@@ -150,11 +232,13 @@ def all_bookings():
     return data
 
 
+# ---------------- DASHBOARD ----------------
+
 def total_cars():
 
     conn = connect()
 
-    count = conn.execute(
+    total = conn.execute(
         """
         SELECT COUNT(*)
         FROM bookings
@@ -163,37 +247,68 @@ def total_cars():
 
     conn.close()
 
-    return count
+    return total
 
 
-def cars_retrieved():
+def retrieved_cars():
 
     conn = connect()
 
-    count = conn.execute(
+    total = conn.execute(
         """
         SELECT COUNT(*)
         FROM bookings
-        WHERE status='Delivered'
+        WHERE status='Delivered Vehicle'
         """
     ).fetchone()[0]
 
     conn.close()
 
-    return count
+    return total
 
 
 def active_drivers():
 
     conn = connect()
 
-    data = conn.execute(
+    drivers = conn.execute(
         """
-        SELECT name,phone
+        SELECT *
         FROM drivers
         """
     ).fetchall()
 
     conn.close()
 
-    return data
+    return drivers
+
+
+# =================================================================
+# 🔥 NEW: UPGRADED PANDAS DATA RETRIEVAL FUNCTIONS FOR FRONT-END UI
+# =================================================================
+
+def get_bookings_df():
+    """Fetches all bookings directly into a clean Pandas DataFrame."""
+    conn = connect()
+    query = "SELECT ticket, customer, phone, car_model, vehicle_number, arrival_time, driver, status, updated_time FROM bookings ORDER BY id DESC"
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    return df
+
+
+def get_drivers_df():
+    """Fetches all driver details into a clean Pandas DataFrame for real-time status management."""
+    conn = connect()
+    query = "SELECT id, name, phone, status FROM drivers"
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    return df
+
+
+def get_customer_history_df(phone):
+    """Fetches a specific customer's parking history based on phone number."""
+    conn = connect()
+    query = "SELECT ticket, car_model, vehicle_number, arrival_time, driver, status, updated_time FROM bookings WHERE phone=? ORDER BY id DESC"
+    df = pd.read_sql_query(query, conn, params=(phone,))
+    conn.close()
+    return df

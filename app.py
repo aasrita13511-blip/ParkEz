@@ -1,4 +1,8 @@
 import streamlit as st
+import pandas as pd  # Ready for any direct frontend manipulations
+from database import *
+
+create_tables()
 
 st.set_page_config(
     page_title="ParkEz",
@@ -6,77 +10,162 @@ st.set_page_config(
     layout="wide"
 )
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+st.markdown("""
+<style>
 
-if "role" not in st.session_state:
-    st.session_state.role = None
-
-
-users = {
-    "9999999999": {
-        "password": "1234",
-        "role": "Customer"
-    },
-    "8888888888": {
-        "password": "1234",
-        "role": "Driver"
-    },
-    "7777777777": {
-        "password": "1234",
-        "role": "Manager"
-    }
+.stApp{
+background:#F5F9FF;
 }
 
+.big-title{
+text-align:center;
+font-size:65px;
+font-weight:bold;
+color:#0B3D91;
+}
 
-if not st.session_state.logged_in:
+.tagline{
+text-align:center;
+font-size:25px;
+color:#555;
+margin-bottom:40px;
+}
 
-    st.title("🚗 ParkEz")
-    st.subheader("Skip the Wait, Enjoy the Ride")
+.block-container{
+padding-top:2rem;
+}
 
-    phone = st.text_input("Phone Number")
+/* --- NEW SIDEBAR CAPITALIZATION STYLING --- */
+[data-testid="stSidebarNavItems"] span {
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    font-weight: 600 !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown(
+"""
+<div class='big-title'>
+🚗 ParkEz
+</div>
+
+<div class='tagline'>
+Skip the Wait, Enjoy the Ride
+</div>
+""",
+unsafe_allow_html=True
+)
+
+tab1, tab2 = st.tabs(
+    [
+        "🔐 LOGIN",
+        "📝 SIGN UP"
+    ]
+)
+
+# ---------------- LOGIN ----------------
+
+with tab1:
+
+    role = st.selectbox(
+        "Login As",
+        [
+            "Customer",
+            "Driver",
+            "Manager"
+        ]
+    )
+
+    phone = st.text_input(
+        "Enter Phone Number"
+    )
+
     password = st.text_input(
-        "Password",
+        "Enter Password",
         type="password"
     )
 
-    if st.button("Login"):
+    if st.button("LOGIN"):
 
-        if phone in users:
+        if role == "Customer":
 
-            if users[phone]["password"] == password:
+            user = customer_login(
+                phone,
+                password
+            )
 
-                st.session_state.logged_in = True
-                st.session_state.role = users[phone]["role"]
+            if user:
+                # Store user info in session memory so pages can filter booking data by phone
+                st.session_state["user_phone"] = phone
+                st.session_state["user_name"] = user[1]
+                st.session_state["role"] = "Customer"
 
-                st.rerun()
+                st.success(f"Welcome {user[1]}")
+                st.switch_page("pages/customer.py")
 
             else:
-                st.error("Wrong Password")
+                st.error("Invalid Credentials")
 
-        else:
-            st.error("Invalid Phone Number")
+        elif role == "Driver":
 
-else:
+            if (
+                phone == "8888888888"
+                and password == "1234"
+            ):
+                st.session_state["user_phone"] = phone
+                st.session_state["role"] = "Driver"
+                
+                st.switch_page("pages/driver.py")
 
-    role = st.session_state.role
+            else:
+                st.error("Invalid Credentials")
 
-    st.sidebar.success(
-        f"Logged in as {role}"
+        elif role == "Manager":
+
+            if (
+                phone == "7777777777"
+                and password == "1234"
+            ):
+                st.session_state["user_phone"] = phone
+                st.session_state["role"] = "Manager"
+                
+                st.switch_page("pages/manager.py")
+
+            else:
+                st.error("Invalid Credentials")
+
+# ---------------- SIGNUP ----------------
+
+with tab2:
+
+    st.subheader(
+        "Create Customer Account"
     )
 
-    if st.sidebar.button("Logout"):
+    name = st.text_input(
+        "Full Name"
+    )
 
-        st.session_state.logged_in = False
-        st.session_state.role = None
+    phone = st.text_input(
+        "Phone Number "
+    )
 
-        st.rerun()
+    password = st.text_input(
+        "Password ",
+        type="password"
+    )
 
-    if role == "Customer":
-        st.switch_page("pages/customer.py")
+    if st.button("SIGN UP"):
 
-    elif role == "Driver":
-        st.switch_page("pages/driver.py")
+        success = register_customer(
+            name,
+            phone,
+            password
+        )
 
-    elif role == "Manager":
-        st.switch_page("pages/manager.py")
+        if success:
+            st.success("Account Created Successfully")
+        else:
+            st.error("Phone Number Already Exists")
