@@ -1,7 +1,14 @@
 import streamlit as st
 import random
-from database import add_booking, get_booking, update_status, get_customer_history_df
-from styles import apply_corporate_theme, render_brand_header
+import time
+
+from database import (
+    add_booking,
+    get_available_driver,
+    get_booking,
+    update_status
+)
+
 
 st.set_page_config(
     page_title="Customer Portal",
@@ -9,107 +16,293 @@ st.set_page_config(
     layout="wide"
 )
 
-apply_corporate_theme()
-render_brand_header("Customer Interactive Valet Space")
 
-tab1, tab2, tab3 = st.tabs(["🚗 REQUEST VALET", "🔑 LIVE STATUS TRACKER", "📊 MY PARKING HISTORY"])
+# ---------------- STYLE ----------------
 
-# ================= REQUEST VALET =================
-with tab1:
-    st.subheader("Book Your Valet Driver")
-    default_name = st.session_state.get("user_name", "")
-    default_phone = st.session_state.get("user_phone", "")
+st.markdown("""
+<style>
 
-    name = st.text_input("Customer Name", value=default_name, key="c_name")
-    phone = st.text_input("Phone Number", value=default_phone, key="c_phone")
-    car_model = st.text_input("Car Model", key="c_car")
-    vehicle_number = st.text_input("Vehicle Number", key="c_num")
-    arrival = st.time_input("Arrival Time", key="c_time")
+.portal-title{
+text-align:center;
+font-size:40px;
+font-weight:bold;
+color:#0B3D91;
+}
 
-    if st.button("REQUEST DRIVER"):
-        if name and phone and car_model and vehicle_number:
-            ticket = "VAL" + str(random.randint(1000, 9999))
-            add_booking((ticket, name, phone, car_model, vehicle_number, str(arrival), "Rahul", "Driver Assigned", "Just Now"))
-            st.success("Valet Request Sent Successfully!")
-            st.info(f"🎫 **Ticket ID:** {ticket} | Copy this code to track your car.")
+.card{
+background:white;
+padding:25px;
+border-radius:20px;
+box-shadow:0px 5px 15px #ddd;
+}
+
+/* --- ADDED THIS HERE TO KEEP THE SIDEBAR IN CAPITALS --- */
+section[data-testid="stSidebar"] *, 
+[data-testid="stSidebarNavItems"] *,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] a {
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    font-weight: 600 !important;
+}
+
+</style>
+
+""", unsafe_allow_html=True)
+
+
+st.markdown(
+"""
+<div class="portal-title">
+👤 CUSTOMER PORTAL
+</div>
+""",
+unsafe_allow_html=True
+)
+
+
+st.divider()
+
+
+# ---------------- TABS ----------------
+
+book, retrieve = st.tabs(
+[
+"🚗 REQUEST VALET",
+"🔑 RETRIEVE VEHICLE"
+]
+)
+
+
+
+# ================= BOOK VALET =================
+
+
+with book:
+
+
+    st.subheader(
+        "Book Your Valet Driver"
+    )
+
+
+    name = st.text_input(
+        "Customer Name"
+    )
+
+
+    phone = st.text_input(
+        "Phone Number"
+    )
+
+
+    car_model = st.text_input(
+        "Car Model"
+    )
+
+
+    vehicle_number = st.text_input(
+        "Vehicle Number"
+    )
+
+
+    arrival = st.time_input(
+        "Arrival Time"
+    )
+
+
+    if st.button(
+        "REQUEST DRIVER"
+    ):
+
+
+        if (
+            name
+            and phone
+            and car_model
+            and vehicle_number
+        ):
+
+
+            ticket = (
+                "VAL"
+                +
+                str(
+                    random.randint(
+                        1000,
+                        9999
+                    )
+                )
+            )
+
+
+            driver = get_available_driver()
+
+
+            add_booking(
+
+                (
+                ticket,
+                name,
+                phone,
+                car_model,
+                vehicle_number,
+                str(arrival),
+                driver,
+                "Driver Assigned",
+                "Just Now"
+                )
+
+            )
+
+
+            st.success(
+                "Valet Driver Assigned Successfully"
+            )
+
+
+            st.info(
+                f"""
+🎫 Ticket ID : {ticket}
+
+🚘 Driver : {driver}
+
+📍 Status : Driver Assigned
+"""
+            )
+
+
         else:
-            st.warning("Please fill all details")
 
-# ================= LIVE STATUS TRACKER (100% STABLE - NO LOOPS) =================
-with tab2:
-    st.subheader("Live Progress Tracking Dashboard")
-    search_ticket = st.text_input("Enter Ticket ID to look up status", key="track_t_id")
+            st.warning(
+                "Please fill all details"
+            )
 
-    if search_ticket:
-        booking = get_booking(search_ticket)
+
+
+
+# ================= RETRIEVE VEHICLE =================
+
+
+
+with retrieve:
+
+
+    st.subheader(
+        "Request Vehicle Retrieval"
+    )
+
+
+    ticket = st.text_input(
+        "Enter Ticket ID"
+    )
+
+
+    leave_time = st.selectbox(
+        "When are you leaving?",
+        [
+            "2 Minutes",
+            "5 Minutes",
+            "10 Minutes"
+        ]
+    )
+
+
+    if st.button(
+        "BRING MY CAR"
+    ):
+
+
+        booking = get_booking(ticket)
+
+
         if booking:
-            if st.button("🚨 REQUEST VEHICLE RETRIEVAL"):
-                update_status(search_ticket, "Vehicle Returning")
-                st.toast("Retrieval request broadcasted to drivers!")
-                st.rerun()
+
+
+            update_status(
+                ticket,
+                "Vehicle Returning"
+            )
+
+
+            st.success(
+                "Driver has been notified"
+            )
+
 
             st.divider()
-            
-            # Read status statically out of database row
-            current_status = booking[8] if len(booking) > 8 else "Driver Assigned"
-            driver_name = booking[7] if len(booking) > 7 else "Assigned Driver"
-            
-            st.markdown(f"### 👨‍✈️ Driver Assigned: {driver_name}")
-            
-            # --- STATIC TIMELINE MILESTONES ---
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                if current_status == "Driver Assigned":
-                    st.markdown("<div style='background:#EFF6FF; border-left:5px solid #1E3A8A; padding:15px; border-radius:8px;'><b>🔵 STEP 1/4</b><br>Driver Confirmed</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Driver Confirmed</div>", unsafe_allow_html=True)
-                    
-            with col2:
-                if current_status == "Picked Up":
-                    st.markdown("<div style='background:#FEF3C7; border-left:5px solid #D97706; padding:15px; border-radius:8px;'><b>🟠 STEP 2/4</b><br>Vehicle Picked Up</div>", unsafe_allow_html=True)
-                elif current_status in ["Parked Vehicle", "Vehicle Returning", "Delivered Vehicle"]:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Vehicle Picked Up</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 2: Pickup Pending</div>", unsafe_allow_html=True)
-                    
-            with col3:
-                if current_status == "Parked Vehicle":
-                    st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>🟢 STEP 3/4</b><br>Secured in Lot</div>", unsafe_allow_html=True)
-                elif current_status in ["Vehicle Returning", "Delivered Vehicle"]:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>✓ Secured in Lot</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 3: Lot Transit</div>", unsafe_allow_html=True)
-                    
-            with col4:
-                if current_status == "Vehicle Returning":
-                    st.markdown("<div style='background:#FEE2E2; border-left:5px solid #DC2626; padding:15px; border-radius:8px;'><b>🔴 STEP 4/4</b><br>Vehicle Returning!</div>", unsafe_allow_html=True)
-                elif current_status == "Delivered Vehicle":
-                    st.markdown("<div style='background:#DCFCE7; border-left:5px solid #16A34A; padding:15px; border-radius:8px;'><b>✅ COMPLETE</b><br>Car Delivered!</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown("<div style='background:#F1F5F9; padding:15px; border-radius:8px; color:#94A3B8;'>🔒 Step 4: Ready at Terminal</div>", unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.success(f"Current System State: The vehicle status is currently **'{current_status}'**.")
+
+
+            st.subheader(
+                "📍 LIVE TRACKING"
+            )
+
+
+
+            tracking = st.empty()
+
+
+
+            steps = [
+
+            "Driver Assigned 🚘",
+
+            "Driver Going To Parking Area 📍",
+
+            "Vehicle Located 🔎",
+
+            "Vehicle Moving 🚗",
+
+            "Arriving At Pickup Point ✅"
+
+            ]
+
+
+
+            progress = st.progress(0)
+
+
+
+            for i,step in enumerate(steps):
+
+
+                time.sleep(1)
+
+
+                tracking.info(
+                    step
+                )
+
+
+                progress.progress(
+                    (i+1)/len(steps)
+                )
+
+
+
+            st.success(
+                f"""
+Vehicle Ready!
+
+ETA : {leave_time}
+
+Driver : {booking[7]}
+"""
+            )
+
+
+
         else:
-            st.error("Ticket ID not found.")
-
-# ================= MY PARKING HISTORY =================
-with tab3:
-    st.subheader("Your Completed Bookings")
-    user_phone = st.session_state.get("user_phone", "")
-    if user_phone:
-        try:
-            history_df = get_customer_history_df(user_phone)
-            if not history_df.empty:
-                st.dataframe(history_df, use_container_width=True, hide_index=True)
-            else:
-                st.info("No records found.")
-        except Exception as e:
-            st.error(f"Error: {e}")
 
 
-# ================= FLOATING CHAT BUTTON REQUIREMENT =================
+            st.error(
+                "Invalid Ticket ID"
+            )
+
+
+# =====================================================================
+# CHATBOT NAVIGATION INTEGRATION (ADDED AT THE BOTTOM)
+# =====================================================================
 st.markdown(
     """
     <style>
@@ -142,9 +335,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Container rendering the navigation chat action target
 with st.container():
     st.markdown('<div class="stActionButton">', unsafe_allow_html=True)
-    if st.button("💬", key="customer_floating_chat_action"):
+    if st.button("💬", key="customer_portal_floating_chat_action"):
         st.switch_page("pages/support_chatbot.py")
     st.markdown('</div>', unsafe_allow_html=True)
