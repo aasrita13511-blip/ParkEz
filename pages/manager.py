@@ -1,11 +1,12 @@
 import streamlit as st
-import pandas as pd  # <--- NEW: Integrated for summary reports and grids
+import pandas as pd
 from database import (
     total_cars,
     retrieved_cars,
     active_drivers,
-    get_bookings_df  # <--- NEW: Fast Pandas data framework query
+    get_bookings_df
 )
+from styles import apply_corporate_theme, render_brand_header
 
 st.set_page_config(
     page_title="Manager Dashboard",
@@ -13,57 +14,16 @@ st.set_page_config(
     layout="wide"
 )
 
-# ------------ STYLE ------------
-
-st.markdown("""
-<style>
-
-.title{
-text-align:center;
-font-size:42px;
-font-weight:bold;
-color:#0B3D91;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:18px;
-box-shadow:0px 5px 15px #ddd;
-margin-bottom: 15px;
-}
-
-/* --- SIDEBAR CAPITALIZATION STYLING --- */
-section[data-testid="stSidebar"] *, 
-[data-testid="stSidebarNavItems"] *,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] a {
-    text-transform: uppercase !important;
-    letter-spacing: 1.2px !important;
-    font-weight: 600 !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown(
-"""
-<div class="title">
-📊 VENUE MANAGER DASHBOARD
-</div>
-""",
-unsafe_allow_html=True
-)
+apply_corporate_theme()
+render_brand_header("Enterprise Administration Dashboard")
 
 st.write("Monitor valet operations in real time.")
 st.divider()
 
 # ------------ ANALYTICS ------------
-
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    # Extracted first element to avoid bracket rendering errors
     tot = total_cars()
     val_tot = tot[0] if isinstance(tot, (list, tuple)) else tot
     st.metric("🚗 TOTAL CARS", val_tot)
@@ -82,21 +42,22 @@ with col4:
 st.divider()
 
 # ------------ DRIVER DETAILS ------------
-
 st.subheader("👨‍✈️ DRIVER AVAILABILITY")
 drivers = active_drivers()
 
 if drivers:
-    # Use clean multi-column layouts instead of long single scrolls
     driver_cols = st.columns(min(len(drivers), 4))
     for idx, driver in enumerate(drivers):
+        d_name = driver[1] if isinstance(driver, (list, tuple)) and len(driver) > 1 else driver
+        d_phone = driver[2] if isinstance(driver, (list, tuple)) and len(driver) > 2 else "N/A"
+        d_status = driver[3] if isinstance(driver, (list, tuple)) and len(driver) > 3 else "Available"
         with driver_cols[idx % 4]:
             st.markdown(
                 f"""
                 <div class="card">
-                    <h4>👨‍✈️ {driver[1]}</h4>
-                    <p style="margin:4px 0;"><b>📞 Phone:</b> {driver[2]}</p>
-                    <p style="margin:4px 0; color: #16A34A;"><b>Status:</b> 🟢 {driver[3] if len(driver) > 3 else "Available"}</p>
+                    <h4>👨‍✈️ {d_name}</h4>
+                    <p style="margin:4px 0;"><b>📞 Phone:</b> {d_phone}</p>
+                    <p style="margin:4px 0; color: #16A34A;"><b>Status:</b> 🟢 {d_status}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -106,8 +67,7 @@ else:
 
 st.divider()
 
-# ------------ VEHICLE ACTIVITY (UPGRADED WITH PANDAS) ------------
-
+# ------------ VEHICLE ACTIVITY ------------
 st.subheader("🚗 LIVE VEHICLE ACTIVITY LOG")
 
 try:
@@ -117,7 +77,6 @@ except Exception as e:
     df = pd.DataFrame()
 
 if not df.empty:
-    # Beautiful Pandas features: Clean string search filter
     search = st.text_input("🔍 Search Activity Log (Type Name, Ticket, or Car Model to filter):")
     
     if search:
@@ -128,10 +87,8 @@ if not df.empty:
             df['vehicle_number'].str.contains(search, case=False, na=False)
         ]
     
-    # Render interactive, clean table
     st.dataframe(df, use_container_width=True, hide_index=True)
     
-    # Download automated Excel/CSV operational reports 
     csv_report = df.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="📥 Download Operational Activity Report (CSV)",
